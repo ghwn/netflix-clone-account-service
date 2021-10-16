@@ -8,6 +8,8 @@ import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -97,6 +99,56 @@ class AccountControllerTest {
                 .andExpect(jsonPath("_links.self.href").exists())
                 .andExpect(jsonPath("_links.profile.href").exists())
                 .andExpect(jsonPath("_links.get-account-list.href").exists())
+                .andDo(print());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @DisplayName("Try to create new account with email that is null or empty")
+    void createAccountWithEmptyEmail(String email) throws Exception {
+        String password = "P@ssw0rd1234";
+        boolean active = false;
+        Set<String> roles = Set.of("USER", "ADMIN");
+
+        AccountCreationRequest request = new AccountCreationRequest(email, password, active, roles);
+
+        mockMvc.perform(post("/api/v1/accounts")
+                        .accept(MediaTypes.HAL_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors[*].field").exists())
+                .andExpect(jsonPath("errors[*].objectName").exists())
+                .andExpect(jsonPath("errors[*].code").exists())
+                .andExpect(jsonPath("errors[*].defaultMessage").exists())
+                .andExpect(jsonPath("errors[*].rejectedValue", hasItem(email)))
+                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("_links.index.href").exists())
+                .andDo(print());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @DisplayName("Try to create new account with password that is null or empty")
+    void createAccountWithEmptyPassword(String password) throws Exception {
+        String email = "admin@example.com";
+        boolean active = false;
+        Set<String> roles = Set.of("USER", "ADMIN");
+
+        AccountCreationRequest request = new AccountCreationRequest(email, password, active, roles);
+
+        mockMvc.perform(post("/api/v1/accounts")
+                        .accept(MediaTypes.HAL_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors[*].field").exists())
+                .andExpect(jsonPath("errors[*].objectName").exists())
+                .andExpect(jsonPath("errors[*].code").exists())
+                .andExpect(jsonPath("errors[*].defaultMessage").exists())
+                .andExpect(jsonPath("errors[*].rejectedValue", hasItem(password)))
+                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
 

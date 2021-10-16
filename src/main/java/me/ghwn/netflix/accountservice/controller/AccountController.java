@@ -1,6 +1,7 @@
 package me.ghwn.netflix.accountservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
 import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import me.ghwn.netflix.accountservice.service.AccountService;
@@ -26,14 +27,22 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RestController
 @RequestMapping("/api/v1/accounts")
 @RequiredArgsConstructor
+@Slf4j
 public class AccountController {
 
     private final AccountService accountService;
     private final ModelMapper modelMapper;
 
-    // FIXME: Handle errors appropriately
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> createAccount(@Valid @RequestBody AccountCreationRequest request, Errors errors) {
+        if (errors.hasErrors()) {
+            errors.getAllErrors().forEach(objectError -> log.error("objectError = {}", objectError));
+            EntityModel<Errors> content = EntityModel.of(errors);
+            Link selfLink = linkTo(getClass()).withSelfRel();
+            content.add(selfLink);
+            content.add(linkTo(IndexController.class).withRel("index"));
+            return ResponseEntity.badRequest().body(content);
+        }
         AccountDto createdAccountDto = accountService.createAccount(request);
 
         EntityModel<AccountDetail> content = EntityModel.of(modelMapper.map(createdAccountDto, AccountDetail.class));
