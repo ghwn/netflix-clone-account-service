@@ -171,8 +171,8 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("Try to get non-existing account")
-    void getNonExistingAccountDetail() throws Exception {
+    @DisplayName("Try to get non-existent account")
+    void getNonExistentAccountDetail() throws Exception {
         mockMvc.perform(get("/api/v1/accounts/10"))
                 .andExpect(header().stringValues(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isNotFound())
@@ -259,8 +259,8 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("Try to update non-existing account")
-    void updateNonExistingAccount() throws Exception {
+    @DisplayName("Try to update non-existent account")
+    void updateNonExistentAccount() throws Exception {
         String newEmail = "newadmin@example.com";
         String newPassword = "newP@ssw0rd1234";
         boolean newActive = true;
@@ -292,8 +292,8 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("Try to delete non-existing account")
-    void deleteNonExistingAccount() throws Exception {
+    @DisplayName("Try to delete non-existent account")
+    void deleteNonExistentAccount() throws Exception {
         mockMvc.perform(delete("/api/v1/accounts/10"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("errors[*].message").exists())
