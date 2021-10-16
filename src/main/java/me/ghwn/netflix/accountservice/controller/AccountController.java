@@ -7,6 +7,7 @@ import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import me.ghwn.netflix.accountservice.service.AccountService;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
 import me.ghwn.netflix.accountservice.vo.AccountDetail;
+import me.ghwn.netflix.accountservice.vo.AccountUpdateRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,5 +83,26 @@ public class AccountController {
         body.add(selfLink.withRel("create-account"));
         body.add(Link.of("/docs/index.html#resources-accounts-list").withRel("profile"));
         return ResponseEntity.ok(body);
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<?> updateAccount(@PathVariable Long id,
+                                           @Valid @RequestBody AccountUpdateRequest request,
+                                           BindingResult bindingResult) throws BindException {
+        if (bindingResult.hasErrors()) {
+            throw new BindException(bindingResult);
+        }
+
+        AccountDto updatedAccountDto = accountService.updateAccount(id, request);
+
+        EntityModel<AccountDetail> content = EntityModel.of(modelMapper.map(updatedAccountDto, AccountDetail.class));
+        Link selfLink = linkTo(getClass()).slash(updatedAccountDto.getId()).withSelfRel();
+        content.add(selfLink);
+        content.add(Link.of("/docs/index.html#resources-account-update").withRel("profile"));
+        content.add(linkTo(getClass()).withRel("get-account-list"));
+        content.add(linkTo(getClass()).withRel("create-account"));
+        content.add(linkTo(getClass()).slash(id).withRel("get-account-detail"));
+        content.add(linkTo(getClass()).slash(id).withRel("delete-account"));
+        return ResponseEntity.ok().body(content);
     }
 }

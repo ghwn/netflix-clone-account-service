@@ -5,16 +5,19 @@ import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -37,6 +39,7 @@ class AccountControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @Autowired AccountRepository accountRepository;
+    @Autowired ModelMapper modelMapper;
 
     // TODO: Add docs
     @Test
@@ -173,7 +176,8 @@ class AccountControllerTest {
         mockMvc.perform(get("/api/v1/accounts/10"))
                 .andExpect(header().stringValues(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("errors").exists())
+                .andExpect(jsonPath("errors[*].message").exists())
+                .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
 
@@ -209,6 +213,68 @@ class AccountControllerTest {
                 .andExpect(jsonPath("page.totalElements").exists())
                 .andExpect(jsonPath("page.totalPages").exists())
                 .andExpect(jsonPath("page.number").exists())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("Update an existing account successfully")
+    @Rollback(false)
+    void updateAccount() throws Exception {
+        // given
+        String oldEmail = "admin@example.com";
+        String oldPassword = "P@ssw0rd1234";
+        boolean oldActive = false;
+        Set<AccountRole> oldRoles = Set.of(AccountRole.USER);
+        Account account = new Account(null, oldEmail, oldPassword, oldActive, oldRoles);
+        accountRepository.save(account);
+
+        String newEmail = "newadmin@example.com";
+        String newPassword = "newP@ssw0rd1234";
+        boolean newActive = !oldActive;
+        Set<String> newRoles = Set.of(AccountRole.USER.name(), AccountRole.ADMIN.name());
+        AccountCreationRequest request = new AccountCreationRequest(newEmail, newPassword, newActive, newRoles);
+
+        // when & then
+        mockMvc.perform(put("/api/v1/accounts/{id}", account.getId())
+                        .accept(MediaTypes.HAL_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(account.getId()))
+                .andExpect(jsonPath("email", not(equalTo(newEmail))))
+                .andExpect(jsonPath("email").value(account.getEmail()))
+                .andExpect(jsonPath("password").doesNotExist())
+                .andExpect(jsonPath("active").value(newActive))
+                .andExpect(jsonPath("roles", Matchers.hasItem(AccountRole.USER.name())))
+                .andExpect(jsonPath("roles", Matchers.hasItem(AccountRole.ADMIN.name())))
+                .andExpect(jsonPath("createdAt").exists())
+                .andExpect(jsonPath("createdAt").exists())
+                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists())
+                .andExpect(jsonPath("_links.get-account-list.href").exists())
+                .andExpect(jsonPath("_links.create-account.href").exists())
+                .andExpect(jsonPath("_links.get-account-detail.href").exists())
+                .andExpect(jsonPath("_links.delete-account.href").exists())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("Try to update non-existing account")
+    void updateNonExistingAccount() throws Exception {
+        String newEmail = "newadmin@example.com";
+        String newPassword = "newP@ssw0rd1234";
+        boolean newActive = true;
+        Set<String> newRoles = Set.of(AccountRole.USER.name(), AccountRole.ADMIN.name());
+        AccountCreationRequest request = new AccountCreationRequest(newEmail, newPassword, newActive, newRoles);
+
+        // when & then
+        mockMvc.perform(put("/api/v1/accounts/10")
+                        .accept(MediaTypes.HAL_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("errors[*].message").exists())
+                .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
 }
