@@ -8,6 +8,7 @@ import java.util.Set;
 @Entity
 @Getter @Setter @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id", callSuper = false)
 public class Account extends TimestampedEntity {
 
     @Id @GeneratedValue
