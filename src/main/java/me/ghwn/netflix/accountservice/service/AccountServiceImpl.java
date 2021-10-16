@@ -6,6 +6,8 @@ import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Optional<AccountDto> getAccountDetail(Long id) {
         return accountRepository.findById(id)
+                .map(account -> modelMapper.map(account, AccountDto.class));
+    }
+
+    @Override
+    public Page<AccountDto> getAccountList(Pageable pageable) {
+        return accountRepository.findAll(pageable)
                 .map(account -> modelMapper.map(account, AccountDto.class));
     }
 }

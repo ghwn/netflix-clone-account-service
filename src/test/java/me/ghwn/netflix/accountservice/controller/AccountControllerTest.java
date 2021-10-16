@@ -17,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -132,6 +134,41 @@ class AccountControllerTest {
                 .andExpect(header().stringValues(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("errors").exists())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("Get account list successfully")
+    void getAccountList() throws Exception {
+        List<Account> accountList = new ArrayList<>();
+        for (int i = 0; i < 30; i++) {
+            String email = String.format("admin%d@example.com", (i + 1));
+            Account account = new Account(null, email, "P@ssw0rd1234", true, Set.of(AccountRole.USER));
+            accountRepository.save(account);
+            accountList.add(account);
+        }
+
+        mockMvc.perform(get("/api/v1/accounts"))
+                .andExpect(status().isOk())
+                .andExpect(header().stringValues(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
+                .andExpect(jsonPath("_embedded.accounts[*].id").exists())
+                .andExpect(jsonPath("_embedded.accounts[*].email").exists())
+                .andExpect(jsonPath("_embedded.accounts[*].password").doesNotExist())
+                .andExpect(jsonPath("_embedded.accounts[*].active").exists())
+                .andExpect(jsonPath("_embedded.accounts[*].roles").exists())
+                .andExpect(jsonPath("_embedded.accounts[*].createdAt").exists())
+                .andExpect(jsonPath("_embedded.accounts[*].updatedAt").exists())
+                .andExpect(jsonPath("_embedded.accounts[*]._links.self.href").exists())
+                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists())
+                .andExpect(jsonPath("_links.first.href").exists())
+                .andExpect(jsonPath("_links.next.href").exists())
+                .andExpect(jsonPath("_links.last.href").exists())
+                .andExpect(jsonPath("_links.create-account.href").exists())
+                .andExpect(jsonPath("page.size").value(20))
+                .andExpect(jsonPath("page.totalElements").exists())
+                .andExpect(jsonPath("page.totalPages").exists())
+                .andExpect(jsonPath("page.number").exists())
                 .andDo(print());
     }
 }

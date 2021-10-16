@@ -7,9 +7,13 @@ import me.ghwn.netflix.accountservice.service.AccountService;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
 import me.ghwn.netflix.accountservice.vo.AccountDetail;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -56,5 +60,21 @@ public class AccountController {
         content.add(selfLink.withRel("update-account"));
         content.add(selfLink.withRel("delete-account"));
         return ResponseEntity.ok(content);
+    }
+
+    @GetMapping(produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<?> getAccountList(Pageable pageable, PagedResourcesAssembler<AccountDto> assembler) {
+        Page<AccountDto> accountList = accountService.getAccountList(pageable);
+
+        PagedModel<EntityModel<AccountDetail>> body = assembler.toModel(accountList, account -> {
+            EntityModel<AccountDetail> model = EntityModel.of(modelMapper.map(account, AccountDetail.class));
+            model.add(linkTo(getClass()).slash(account.getId()).withSelfRel());
+            return model;
+        });
+
+        Link selfLink = linkTo(getClass()).withSelfRel();
+        body.add(selfLink.withRel("create-account"));
+        body.add(Link.of("/docs/index.html#resources-accounts-list").withRel("profile"));
+        return ResponseEntity.ok(body);
     }
 }
