@@ -50,4 +50,11 @@ public class AccountServiceImpl implements AccountService {
         modelMapper.map(request, account);
         return modelMapper.map(account, AccountDto.class);
     }
+
+    @Transactional
+    @Override
+    public void deleteAccount(Long id) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException());
+        accountRepository.delete(account);
+    }
 }

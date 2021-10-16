@@ -17,4 +17,6 @@ public interface AccountService {
     Page<AccountDto> getAccountList(Pageable pageable);
 
     AccountDto updateAccount(Long id, AccountUpdateRequest request);
+
+    void deleteAccount(Long id);
 }

@@ -277,4 +277,27 @@ class AccountControllerTest {
                 .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
+
+    @Test
+    @DisplayName("Delete an existing account successfully")
+    void deleteAccount() throws Exception {
+        Account account = new Account(null, "admin@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER));
+        accountRepository.save(account);
+
+        mockMvc.perform(delete("/api/v1/accounts/{id}", account.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_links.profile.href").exists())
+                .andExpect(jsonPath("_links.create-account.href").exists())
+                .andExpect(jsonPath("_links.get-account-list.href").exists());
+    }
+
+    @Test
+    @DisplayName("Try to delete non-existing account")
+    void deleteNonExistingAccount() throws Exception {
+        mockMvc.perform(delete("/api/v1/accounts/10"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("errors[*].message").exists())
+                .andExpect(jsonPath("_links.index.href").exists())
+                .andDo(print());
+    }
 }

@@ -12,10 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -103,6 +100,16 @@ public class AccountController {
         content.add(linkTo(getClass()).withRel("create-account"));
         content.add(linkTo(getClass()).slash(id).withRel("get-account-detail"));
         content.add(linkTo(getClass()).slash(id).withRel("delete-account"));
+        return ResponseEntity.ok().body(content);
+    }
+
+    @DeleteMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
+        accountService.deleteAccount(id);
+        RepresentationModel<?> content = RepresentationModel.of(null);
+        content.add(Link.of("/docs/index.html#resources-account-delete").withRel("profile"));
+        content.add(linkTo(getClass()).withRel("get-account-list"));
+        content.add(linkTo(getClass()).withRel("create-account"));
         return ResponseEntity.ok().body(content);
     }
 }
