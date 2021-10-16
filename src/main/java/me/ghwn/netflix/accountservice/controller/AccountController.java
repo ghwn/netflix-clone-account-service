@@ -17,7 +17,8 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -34,15 +35,12 @@ public class AccountController {
     private final ModelMapper modelMapper;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaTypes.HAL_JSON_VALUE)
-    public ResponseEntity<?> createAccount(@Valid @RequestBody AccountCreationRequest request, Errors errors) {
-        if (errors.hasErrors()) {
-            errors.getAllErrors().forEach(objectError -> log.error("objectError = {}", objectError));
-            EntityModel<Errors> content = EntityModel.of(errors);
-            Link selfLink = linkTo(getClass()).withSelfRel();
-            content.add(selfLink);
-            content.add(linkTo(IndexController.class).withRel("index"));
-            return ResponseEntity.badRequest().body(content);
+    public ResponseEntity<?> createAccount(@Valid @RequestBody AccountCreationRequest request,
+                                           BindingResult bindingResult) throws BindException {
+        if (bindingResult.hasErrors()) {
+            throw new BindException(bindingResult);
         }
+
         AccountDto createdAccountDto = accountService.createAccount(request);
 
         EntityModel<AccountDetail> content = EntityModel.of(modelMapper.map(createdAccountDto, AccountDetail.class));
@@ -53,7 +51,6 @@ public class AccountController {
         return ResponseEntity.created(selfLink.toUri()).body(content);
     }
 
-    // FIXME: Return 404 error response when requested account does not exist.
     @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> getAccountDetail(@PathVariable Long id) {
         AccountDto accountDto = accountService.getAccountDetail(id)

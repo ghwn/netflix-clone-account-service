@@ -5,7 +5,6 @@ import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -117,12 +116,7 @@ class AccountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errors[*].field").exists())
-                .andExpect(jsonPath("errors[*].objectName").exists())
-                .andExpect(jsonPath("errors[*].code").exists())
-                .andExpect(jsonPath("errors[*].defaultMessage").exists())
-                .andExpect(jsonPath("errors[*].rejectedValue", hasItem(email)))
-                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("errors[*].message").exists())
                 .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
@@ -142,12 +136,7 @@ class AccountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errors[*].field").exists())
-                .andExpect(jsonPath("errors[*].objectName").exists())
-                .andExpect(jsonPath("errors[*].code").exists())
-                .andExpect(jsonPath("errors[*].defaultMessage").exists())
-                .andExpect(jsonPath("errors[*].rejectedValue", hasItem(password)))
-                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("errors[*].message").exists())
                 .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
@@ -180,7 +169,6 @@ class AccountControllerTest {
 
     @Test
     @DisplayName("Try to get non-existing account")
-    @Disabled
     void getNonExistingAccountDetail() throws Exception {
         mockMvc.perform(get("/api/v1/accounts/10"))
                 .andExpect(header().stringValues(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
