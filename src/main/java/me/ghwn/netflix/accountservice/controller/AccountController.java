@@ -2,6 +2,7 @@ package me.ghwn.netflix.accountservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
+import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import me.ghwn.netflix.accountservice.service.AccountService;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
 import me.ghwn.netflix.accountservice.vo.AccountDetail;
@@ -12,10 +13,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -40,5 +38,23 @@ public class AccountController {
         content.add(Link.of("/docs/index.html#resources-accounts-create").withRel("profile"));
         content.add(linkTo(getClass()).withRel("get-account-list"));
         return ResponseEntity.created(selfLink.toUri()).body(content);
+    }
+
+    // FIXME: Return 404 error response when requested account does not exist.
+    @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<?> getAccountDetail(@PathVariable Long id) {
+        AccountDto accountDto = accountService.getAccountDetail(id)
+                .orElseThrow(() -> new AccountNotFoundException());
+        AccountDetail accountDetail = modelMapper.map(accountDto, AccountDetail.class);
+
+        EntityModel<AccountDetail> content = EntityModel.of(accountDetail);
+        Link selfLink = linkTo(getClass()).slash(id).withSelfRel();
+        content.add(selfLink);
+        content.add(Link.of("/docs/index.html#resources-account-detail").withRel("profile"));
+        content.add(linkTo(getClass()).withRel("get-account-list"));
+        content.add(linkTo(getClass()).withRel("create-account"));
+        content.add(selfLink.withRel("update-account"));
+        content.add(selfLink.withRel("delete-account"));
+        return ResponseEntity.ok(content);
     }
 }
