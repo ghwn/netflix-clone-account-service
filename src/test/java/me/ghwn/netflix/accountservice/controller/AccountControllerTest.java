@@ -5,6 +5,7 @@ import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
+import me.ghwn.netflix.accountservice.vo.AccountUpdateRequest;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,7 +73,6 @@ class AccountControllerTest {
                 .build();
     }
 
-    // TODO: Add docs
     @Test
     @DisplayName("Create new account successfully by passing required fields only")
     void createAccountWithRequiredFields() throws Exception {
@@ -198,7 +198,6 @@ class AccountControllerTest {
                 .andDo(print());
     }
 
-    // TODO: Add docs
     @Test
     @DisplayName("Get an existing account successfully")
     void getAccountDetail() throws Exception {
@@ -457,5 +456,41 @@ class AccountControllerTest {
         mockMvc.perform(get("/api/v1/accounts"))
                 .andExpect(jsonPath("_embedded.accounts").exists())
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("Update an existing account to have only admin role")
+    void updateAccountToHaveOnlyAdminRole() throws Exception {
+        Account account = new Account(null, "admin@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER, AccountRole.ADMIN));
+        accountRepository.save(account);
+
+        AccountUpdateRequest request = modelMapper.map(account, AccountUpdateRequest.class);
+        request.setRoles(Set.of(AccountRole.ADMIN.name()));
+        mockMvc.perform(put("/api/v1/accounts/{id}", account.getId())
+                        .accept(MediaTypes.HAL_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("roles", hasItem(AccountRole.ADMIN.name())))
+                .andExpect(jsonPath("roles", not(hasItem(AccountRole.USER.name()))))
+                .andExpect(jsonPath("roles", hasSize(1)));
+    }
+
+    @Test
+    @DisplayName("Update an existing account to have only user role")
+    void updateAccountToHaveOnlyUserRole() throws Exception {
+        Account account = new Account(null, "admin@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER, AccountRole.ADMIN));
+        accountRepository.save(account);
+
+        AccountUpdateRequest request = modelMapper.map(account, AccountUpdateRequest.class);
+        request.setRoles(Set.of(AccountRole.USER.name()));
+        mockMvc.perform(put("/api/v1/accounts/{id}", account.getId())
+                        .accept(MediaTypes.HAL_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("roles", hasItem(AccountRole.USER.name())))
+                .andExpect(jsonPath("roles", not(hasItem(AccountRole.ADMIN.name()))))
+                .andExpect(jsonPath("roles", hasSize(1)));
     }
 }

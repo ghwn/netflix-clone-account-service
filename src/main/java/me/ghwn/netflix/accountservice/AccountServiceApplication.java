@@ -19,7 +19,9 @@ public class AccountServiceApplication {
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.getConfiguration()
+                .setSkipNullEnabled(true)
+                .setCollectionsMergeEnabled(false);
         return modelMapper;
     }
 }
