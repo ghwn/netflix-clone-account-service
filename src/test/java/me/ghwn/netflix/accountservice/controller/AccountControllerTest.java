@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
@@ -40,7 +41,6 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -492,5 +492,25 @@ class AccountControllerTest {
                 .andExpect(jsonPath("roles", hasItem(AccountRole.USER.name())))
                 .andExpect(jsonPath("roles", not(hasItem(AccountRole.ADMIN.name()))))
                 .andExpect(jsonPath("roles", hasSize(1)));
+    }
+
+    @Test
+    @DisplayName("Try to update an existing account with invalid account role")
+    void updateAccountWithInvalidRoles() throws Exception {
+        Set<AccountRole> accountRolesBeforeUpdate = Set.of(AccountRole.USER);
+        Account account = new Account(null, "admin@example.com", "P@ssw0rd1234", true, accountRolesBeforeUpdate);
+        accountRepository.save(account);
+
+        AccountUpdateRequest request = modelMapper.map(account, AccountUpdateRequest.class);
+        request.setRoles(Set.of("HELLO"));
+
+        mockMvc.perform(put("/api/v1/accounts/{id}", account.getId())
+                        .accept(MediaTypes.HAL_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        Account updatedAccount = accountRepository.findById(account.getId()).get();
+        assertThat(updatedAccount.getRoles()).isEqualTo(accountRolesBeforeUpdate);
     }
 }
