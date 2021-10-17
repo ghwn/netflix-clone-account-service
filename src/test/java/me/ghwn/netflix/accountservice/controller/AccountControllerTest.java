@@ -6,20 +6,26 @@ import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,19 +33,44 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@ExtendWith({RestDocumentationExtension.class})
 @SpringBootTest
 @Transactional
-@AutoConfigureMockMvc
 class AccountControllerTest {
 
-    @Autowired MockMvc mockMvc;
+    @Autowired WebApplicationContext webApplicationContext;
     @Autowired ObjectMapper objectMapper;
     @Autowired AccountRepository accountRepository;
     @Autowired ModelMapper modelMapper;
+
+    RestDocumentationResultHandler documentHandler;
+    MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp(RestDocumentationContextProvider restDocumentation) {
+        documentHandler = document(
+                "{method-name}",
+                preprocessRequest(prettyPrint()),
+                preprocessResponse(prettyPrint())
+        );
+
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(documentationConfiguration(restDocumentation))
+                .alwaysDo(print())
+                .alwaysDo(documentHandler)
+                .build();
+    }
 
     // TODO: Add docs
     @Test
@@ -67,13 +98,12 @@ class AccountControllerTest {
                 .andExpect(jsonPath("updatedAt", notNullValue()))
                 .andExpect(jsonPath("_links.self.href").exists())
                 .andExpect(jsonPath("_links.profile.href").exists())
-                .andExpect(jsonPath("_links.get-account-list.href").exists())
-                .andDo(print());
+                .andExpect(jsonPath("_links.get-account-list.href").exists());
     }
 
     @Test
     @DisplayName("Create new account successfully by passing all required and optional fields")
-    void createAccountWithAllFields() throws Exception {
+    void createAccount() throws Exception {
         String email = "admin@example.com";
         String password = "P@ssw0rd1234";
         Set<String> roles = Set.of("USER", "ADMIN");
@@ -101,7 +131,31 @@ class AccountControllerTest {
                 .andExpect(jsonPath("_links.self.href").exists())
                 .andExpect(jsonPath("_links.profile.href").exists())
                 .andExpect(jsonPath("_links.get-account-list.href").exists())
-                .andDo(print());
+
+                .andDo(documentHandler.document(
+                        requestFields(
+                                fieldWithPath("email").description("Email of new account"),
+                                fieldWithPath("password").description("Password of new account"),
+                                fieldWithPath("active").description("Whether the account is active or not"),
+                                fieldWithPath("roles").description("Authorities of new account")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").description("ID of new account"),
+                                fieldWithPath("email").description("Email of new account"),
+                                fieldWithPath("active").description("Whether the account is active or not"),
+                                fieldWithPath("roles").description("Authorities of new account"),
+                                fieldWithPath("createdAt").description("Created date and time of the account"),
+                                fieldWithPath("updatedAt").description("Last updated date and time of the account"),
+                                fieldWithPath("_links.self.href").description("Link to <<resources_accounts_create, self>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document"),
+                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources-accounts-list, get account list>>")
+                        ),
+                        links(
+                                linkWithRel("self").description("Link to <<resources-accounts_create, self>>"),
+                                linkWithRel("profile").description("Link to document"),
+                                linkWithRel("get-account-list").description("Link to <<resources-accounts-list, get account list>>")
+                        )
+                ));
     }
 
     @ParameterizedTest
@@ -167,7 +221,31 @@ class AccountControllerTest {
                 .andExpect(jsonPath("_links.create-account.href").exists())
                 .andExpect(jsonPath("_links.update-account.href").exists())
                 .andExpect(jsonPath("_links.delete-account.href").exists())
-                .andDo(print());
+
+                .andDo(documentHandler.document(
+                        responseFields(
+                                fieldWithPath("id").description("ID of account"),
+                                fieldWithPath("email").description("Email of account"),
+                                fieldWithPath("active").description("Whether the account is active or not"),
+                                fieldWithPath("roles").description("Authorities of account"),
+                                fieldWithPath("createdAt").description("Created date and time of account"),
+                                fieldWithPath("updatedAt").description("Last updated date and time of account"),
+                                fieldWithPath("_links.self.href").description("Link to <<resources_account_retrieve, self>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document"),
+                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>"),
+                                fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
+                                fieldWithPath("_links.update-account.href").description("Link to <<resources_account_update, update an existing account>>"),
+                                fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>")
+                        ),
+                        links(
+                                linkWithRel("self").description("Link to <<resources_account_retrieve, self>>"),
+                                linkWithRel("profile").description("Link to document"),
+                                linkWithRel("get-account-list").description("Link to <<resources_accounts_list, get account list>>"),
+                                linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
+                                linkWithRel("update-account").description("Link to <<resources_account_update, update an existing account>>"),
+                                linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>")
+                        )
+                ));
     }
 
     @Test
@@ -185,7 +263,7 @@ class AccountControllerTest {
     @DisplayName("Get account list successfully")
     void getAccountList() throws Exception {
         List<Account> accountList = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 100; i++) {
             String email = String.format("admin%d@example.com", (i + 1));
             Account account = new Account(null, email, "P@ssw0rd1234", true, Set.of(AccountRole.USER));
             accountRepository.save(account);
@@ -213,7 +291,36 @@ class AccountControllerTest {
                 .andExpect(jsonPath("page.totalElements").exists())
                 .andExpect(jsonPath("page.totalPages").exists())
                 .andExpect(jsonPath("page.number").exists())
-                .andDo(print());
+
+                .andDo(documentHandler.document(
+                        responseFields(
+                                fieldWithPath("_embedded.accounts[].id").description("ID of account"),
+                                fieldWithPath("_embedded.accounts[].email").description("Email of account"),
+                                fieldWithPath("_embedded.accounts[].active").description("Whether the account is active or not"),
+                                fieldWithPath("_embedded.accounts[].roles").description("Authorities of account"),
+                                fieldWithPath("_embedded.accounts[].createdAt").description("Created date and time of the account"),
+                                fieldWithPath("_embedded.accounts[].updatedAt").description("Last updated date and time of the account"),
+                                fieldWithPath("_embedded.accounts[]._links.self.href").description("Link to the account"),
+                                fieldWithPath("_links.self.href").description("Link to <<resources_accounts_create, self>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document"),
+                                fieldWithPath("_links.first.href").description("Link to the first page"),
+                                fieldWithPath("_links.next.href").description("Link to the next page"),
+                                fieldWithPath("_links.last.href").description("Link to the last page"),
+                                fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
+                                fieldWithPath("page.size").description("The number of elements per one page"),
+                                fieldWithPath("page.totalElements").description("The number of total elements"),
+                                fieldWithPath("page.totalPages").description("The number of total pages"),
+                                fieldWithPath("page.number").description("Current page number")
+                        ),
+                        links(
+                                linkWithRel("self").description("Link to <<resources_accounts_create, self>>"),
+                                linkWithRel("profile").description("Link to document"),
+                                linkWithRel("first").description("Link to the first page"),
+                                linkWithRel("next").description("Link to the next page"),
+                                linkWithRel("last").description("Link to the last page"),
+                                linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>")
+                        )
+                ));
     }
 
     @Test
@@ -255,7 +362,37 @@ class AccountControllerTest {
                 .andExpect(jsonPath("_links.create-account.href").exists())
                 .andExpect(jsonPath("_links.get-account-detail.href").exists())
                 .andExpect(jsonPath("_links.delete-account.href").exists())
-                .andDo(print());
+
+                .andDo(documentHandler.document(
+                        requestFields(
+                                fieldWithPath("email").description("This field is ignored"),
+                                fieldWithPath("password").description("New password of account"),
+                                fieldWithPath("active").description("New active status of account"),
+                                fieldWithPath("roles").description("New authorities of account")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").description("ID of new account"),
+                                fieldWithPath("email").description("Email of new account"),
+                                fieldWithPath("active").description("Whether the account is active or not"),
+                                fieldWithPath("roles").description("Authorities of new account"),
+                                fieldWithPath("createdAt").description("Created date and time of the account"),
+                                fieldWithPath("updatedAt").description("Last updated date and time of the account"),
+                                fieldWithPath("_links.self.href").description("Link to <<resources_account_retrieve, self>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document"),
+                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>"),
+                                fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
+                                fieldWithPath("_links.get-account-detail.href").description("Link to <<resources_account_retrieve, get account detail>>"),
+                                fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>")
+                        ),
+                        links(
+                                linkWithRel("self").description("Link to <<resources_account_retrieve, self>>"),
+                                linkWithRel("profile").description("Link to document"),
+                                linkWithRel("get-account-list").description("Link to <<resources_accounts_list, get account list>>"),
+                                linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
+                                linkWithRel("get-account-detail").description("Link to <<resources_account_retrieve, get account detail>>"),
+                                linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>")
+                        )
+                ));
     }
 
     @Test
@@ -288,7 +425,20 @@ class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("_links.profile.href").exists())
                 .andExpect(jsonPath("_links.create-account.href").exists())
-                .andExpect(jsonPath("_links.get-account-list.href").exists());
+                .andExpect(jsonPath("_links.get-account-list.href").exists())
+
+                .andDo(documentHandler.document(
+                        responseFields(
+                                fieldWithPath("_links.profile.href").description("Link to document"),
+                                fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
+                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>")
+                        ),
+                        links(
+                                linkWithRel("profile").description("Link to document"),
+                                linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
+                                linkWithRel("get-account-list").description("Link to <<resources_accounts_list, get account list>>")
+                        )
+                ));
     }
 
     @Test

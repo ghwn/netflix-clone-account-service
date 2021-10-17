@@ -1,0 +1,178 @@
+= RESTful Accounts API Guide
+ghwn;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+:operation-curl-request-title: Example request
+:operation-http-response-title: Example response
+
+
+[[overview]]
+= Overview
+
+[[overview_http_verbs]]
+== HTTP verbs
+
+RESTful accounts tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP verbs.
+
+|===
+| Verb | Usage
+
+| `GET`
+| Used to retrieve a resource
+
+| `POST`
+| Used to create a new resource
+
+| `PUT`
+| Used to update an existing resource
+
+| `DELETE`
+| Used to delete an existing resource
+|===
+
+[[overview_http_status_codes]]
+== HTTP status codes
+
+RESTful accounts tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP status codes.
+
+|===
+| Status code | Usage
+
+| `200 OK`
+| The request completed successfully
+
+| `201 Created`
+| A new resource has been created successfully. The resource's URI is available from the response's
+`Location` header
+
+| `400 Bad Request`
+| The request was malformed. The response body will include an error providing further information
+
+| `404 Not Found`
+| The requested resource did not exist
+|===
+
+[[overview_headers]]
+== Headers
+
+Every response has the following header(s):
+
+include::{snippets}/headers-example/response-headers.adoc[]
+
+[[overview_errors]]
+== Errors
+
+Whenever an error response (status code >= 400) is returned, the body will contain a JSON object
+that describes the problem. The error object has the following structure:
+
+include::{snippets}/error-example/response-fields.adoc[]
+
+For example, a request that attempts to retrieve a non-existent account will produce a
+`400 Bad Request` response:
+
+include::{snippets}/error-example/http-response.adoc[]
+
+[[overview_hypermedia]]
+== Hypermedia
+
+RESTful Accounts uses hypermedia and resources include links to other resources in their
+responses. Responses are in https://github.com/mikekelly/hal_specification[Hypertext
+Application Language (HAL)] format. Links can be found beneath the `_links` key. Users of
+the API should not create URIs themselves, instead they should use the above-described
+links to navigate from resource to resource.
+
+[[resources]]
+= Resources
+
+
+
+[[resources_index]]
+== Index
+
+The index provides the entry point into the service.
+
+
+
+[[resources_index_access]]
+=== Accessing the index
+
+A `GET` request is used to access the index
+
+include::{snippets}/index/response-fields.adoc[]
+include::{snippets}/index/http-response.adoc[]
+include::{snippets}/index/links.adoc[]
+
+
+
+[[resources_accounts]]
+== Accounts
+
+The Accounts resources is used to create and list accounts
+
+
+
+[[resources_accounts_list]]
+=== Listing accounts
+
+A `GET` request will list all of the service's accounts.
+
+include::{snippets}/get-account-list/response-fields.adoc[]
+include::{snippets}/get-account-list/curl-request.adoc[]
+include::{snippets}/get-account-list/http-response.adoc[]
+
+
+
+[[resources_accounts_create]]
+=== Creating an account
+
+A `POST` request is used to create an account
+
+include::{snippets}/create-account/request-fields.adoc[]
+include::{snippets}/create-account/curl-request.adoc[]
+include::{snippets}/create-account/http-response.adoc[]
+
+
+
+[[resources_account]]
+== Account
+
+The Account resource is used to retrieve, update, and delete individual accounts
+
+
+
+[[resources_account_retrieve]]
+=== Retrieve an account
+
+A `GET` request will retrieve the details of an account
+
+include::{snippets}/get-account-detail/response-fields.adoc[]
+include::{snippets}/get-account-detail/curl-request.adoc[]
+include::{snippets}/get-account-detail/http-response.adoc[]
+
+
+
+[[resources_account_update]]
+=== Update an account
+
+A `PUT` request is used to update an account
+
+include::{snippets}/get-account-detail/response-fields.adoc[]
+include::{snippets}/update-account/curl-request.adoc[]
+include::{snippets}/update-account/http-response.adoc[]
+
+
+
+[[resources_account_delete]]
+=== Delete an account
+
+A `DELETE` request is used to delete an account
+
+include::{snippets}/delete-account/response-fields.adoc[]
+include::{snippets}/delete-account/curl-request.adoc[]
+include::{snippets}/delete-account/http-response.adoc[]
