@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -86,7 +87,8 @@ class AccountControllerTest {
         mockMvc.perform(post("/api/v1/accounts")
                         .accept(MediaTypes.HAL_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("id").isNumber())
                 .andExpect(jsonPath("email").exists())
@@ -99,6 +101,22 @@ class AccountControllerTest {
                 .andExpect(jsonPath("_links.self.href").exists())
                 .andExpect(jsonPath("_links.profile.href").exists())
                 .andExpect(jsonPath("_links.get-account-list.href").exists());
+    }
+
+    @Test
+    @DisplayName("Create new account with invalid account role")
+    void createAccountWithInvalidAccountRole() throws Exception {
+        String email = "admin@example.com";
+        String password = "P@ssw0rd1234";
+        boolean active = false;
+        Set<String> roles = Set.of("USER", "HELLO");
+
+        AccountCreationRequest request = new AccountCreationRequest(email, password, active, roles);
+        mockMvc.perform(post("/api/v1/accounts")
+                        .accept(MediaTypes.HAL_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
