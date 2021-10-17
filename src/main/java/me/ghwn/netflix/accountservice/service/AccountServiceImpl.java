@@ -3,7 +3,6 @@ package me.ghwn.netflix.accountservice.service;
 import lombok.RequiredArgsConstructor;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
 import me.ghwn.netflix.accountservice.entity.Account;
-import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -50,21 +47,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountDto updateAccount(Long id, AccountUpdateRequest request) {
         Account account = accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException());
-        account.setPassword(request.getPassword());
-        if (request.getActive() != null) {
-            account.setActive(request.getActive());
-        }
-        try {
-            for (String role : request.getRoles()) {
-                AccountRole.valueOf(role.toUpperCase());
-            }
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid account role contained");
-        }
-        Set<AccountRole> accountRoles = request.getRoles().stream()
-                .map(role -> AccountRole.valueOf(role.toUpperCase()))
-                .collect(Collectors.toSet());
-        account.setRoles(accountRoles);
+        modelMapper.map(request, account);
         return modelMapper.map(account, AccountDto.class);
     }
 

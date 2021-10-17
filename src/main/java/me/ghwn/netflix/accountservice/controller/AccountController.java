@@ -3,6 +3,7 @@ package me.ghwn.netflix.accountservice.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
+import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import me.ghwn.netflix.accountservice.service.AccountService;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
@@ -20,6 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -38,6 +40,8 @@ public class AccountController {
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
         }
+
+        validateAccountRoles(request.getRoles());
 
         AccountDto createdAccountDto = accountService.createAccount(request);
 
@@ -95,6 +99,8 @@ public class AccountController {
             throw new BindException(bindingResult);
         }
 
+        validateAccountRoles(request.getRoles());
+
         AccountDto updatedAccountDto = accountService.updateAccount(id, request);
 
         EntityModel<AccountDetail> content = EntityModel.of(modelMapper.map(updatedAccountDto, AccountDetail.class));
@@ -116,5 +122,17 @@ public class AccountController {
         content.add(linkTo(getClass()).withRel("get-account-list"));
         content.add(linkTo(getClass()).withRel("create-account"));
         return ResponseEntity.ok().body(content);
+    }
+
+    private void validateAccountRoles(Set<String> accountRoles) {
+        if (accountRoles != null) {
+            try {
+                for (String accountRole : accountRoles) {
+                    AccountRole.valueOf(accountRole.toUpperCase());
+                }
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid account role contained");
+            }
+        }
     }
 }
