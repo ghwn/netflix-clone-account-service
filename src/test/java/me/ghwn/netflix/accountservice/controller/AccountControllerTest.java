@@ -450,4 +450,12 @@ class AccountControllerTest {
                 .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
+
+    @Test
+    @DisplayName("Check if _embedded.accounts array does still exist when there are no accounts")
+    void keepEmbeddedAccountsArrayWhenNoAccounts() throws Exception {
+        mockMvc.perform(get("/api/v1/accounts"))
+                .andExpect(jsonPath("_embedded.accounts").exists())
+                .andDo(print());
+    }
 }

@@ -70,16 +70,21 @@ public class AccountController {
     public ResponseEntity<?> getAccountList(Pageable pageable, PagedResourcesAssembler<AccountDto> assembler) {
         Page<AccountDto> accountList = accountService.getAccountList(pageable);
 
-        PagedModel<EntityModel<AccountDetail>> body = assembler.toModel(accountList, account -> {
-            EntityModel<AccountDetail> model = EntityModel.of(modelMapper.map(account, AccountDetail.class));
-            model.add(linkTo(getClass()).slash(account.getId()).withSelfRel());
-            return model;
-        });
+        PagedModel<?> content = null;
+        if (!accountList.hasContent()) {
+            content = assembler.toEmptyModel(accountList, AccountDetail.class);
+        } else {
+            content = assembler.toModel(accountList, account -> {
+                EntityModel<AccountDetail> model = EntityModel.of(modelMapper.map(account, AccountDetail.class));
+                model.add(linkTo(getClass()).slash(account.getId()).withSelfRel());
+                return model;
+            });
+        }
 
         Link selfLink = linkTo(getClass()).withSelfRel();
-        body.add(selfLink.withRel("create-account"));
-        body.add(Link.of("/docs/index.html#resources-accounts-list").withRel("profile"));
-        return ResponseEntity.ok(body);
+        content.add(selfLink.withRel("create-account"));
+        content.add(Link.of("/docs/index.html#resources-accounts-list").withRel("profile"));
+        return ResponseEntity.ok(content);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaTypes.HAL_JSON_VALUE)
