@@ -1,32 +1,20 @@
 package me.ghwn.netflix.accountservice.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
 import me.ghwn.netflix.accountservice.vo.AccountUpdateRequest;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.RestDocumentationContextProvider;
-import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -38,41 +26,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith({RestDocumentationExtension.class})
-@SpringBootTest
-@Transactional
-class AccountControllerTest {
+class AccountControllerTest extends BaseControllerTest {
 
-    @Autowired WebApplicationContext webApplicationContext;
-    @Autowired ObjectMapper objectMapper;
     @Autowired AccountRepository accountRepository;
-    @Autowired ModelMapper modelMapper;
-
-    RestDocumentationResultHandler documentHandler;
-    MockMvc mockMvc;
-
-    @BeforeEach
-    void setUp(RestDocumentationContextProvider restDocumentation) {
-        documentHandler = document(
-                "{method-name}",
-                preprocessRequest(prettyPrint()),
-                preprocessResponse(prettyPrint())
-        );
-
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(documentationConfiguration(restDocumentation))
-                .alwaysDo(print())
-                .alwaysDo(documentHandler)
-                .build();
-    }
 
     @Test
     @DisplayName("Create new account successfully by passing required fields only")
