@@ -47,8 +47,11 @@ public class AccountController {
         EntityModel<AccountDetail> content = EntityModel.of(modelMapper.map(createdAccountDto, AccountDetail.class));
         Link selfLink = linkTo(getClass()).slash(createdAccountDto.getId()).withSelfRel();
         content.add(selfLink);
-        content.add(Link.of("/docs/index.html#resources-accounts-create").withRel("profile"));
+        content.add(selfLink.withRel("create-account"));
         content.add(linkTo(getClass()).withRel("get-account-list"));
+        content.add(linkTo(getClass()).slash(createdAccountDto.getId()).withRel("update-account"));
+        content.add(linkTo(getClass()).slash(createdAccountDto.getId()).withRel("delete-account"));
+        content.add(Link.of("/docs/index.html#resources-accounts-create").withRel("profile"));
         return ResponseEntity.created(selfLink.toUri()).body(content);
     }
 

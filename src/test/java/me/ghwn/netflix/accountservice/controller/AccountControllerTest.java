@@ -16,7 +16,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -48,20 +47,8 @@ class AccountControllerTest extends BaseControllerTest {
         mockMvc.perform(post("/api/v1/accounts")
                         .accept(MediaTypes.HAL_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("id").isNumber())
-                .andExpect(jsonPath("email").exists())
-                .andExpect(jsonPath("password").doesNotExist())
-                .andExpect(jsonPath("active").value(true))
-                .andExpect(jsonPath("roles", hasItem(AccountRole.USER.name())))
-                .andExpect(jsonPath("roles", not(hasItem(AccountRole.ADMIN.name()))))
-                .andExpect(jsonPath("createdAt", notNullValue()))
-                .andExpect(jsonPath("updatedAt", notNullValue()))
-                .andExpect(jsonPath("_links.self.href").exists())
-                .andExpect(jsonPath("_links.profile.href").exists())
-                .andExpect(jsonPath("_links.get-account-list.href").exists());
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -108,8 +95,11 @@ class AccountControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("createdAt", notNullValue()))
                 .andExpect(jsonPath("updatedAt", notNullValue()))
                 .andExpect(jsonPath("_links.self.href").exists())
-                .andExpect(jsonPath("_links.profile.href").exists())
+                .andExpect(jsonPath("_links.create-account.href").exists())
                 .andExpect(jsonPath("_links.get-account-list.href").exists())
+                .andExpect(jsonPath("_links.update-account.href").exists())
+                .andExpect(jsonPath("_links.delete-account.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists())
 
                 .andDo(documentHandler.document(
                         requestFields(
@@ -126,13 +116,19 @@ class AccountControllerTest extends BaseControllerTest {
                                 fieldWithPath("createdAt").description("Created date and time of the account"),
                                 fieldWithPath("updatedAt").description("Last updated date and time of the account"),
                                 fieldWithPath("_links.self.href").description("Link to <<resources_accounts_create, self>>"),
-                                fieldWithPath("_links.profile.href").description("Link to document"),
-                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources-accounts-list, get account list>>")
+                                fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
+                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>"),
+                                fieldWithPath("_links.update-account.href").description("Link to <<resources_account_update, update an existing account>>"),
+                                fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document")
                         ),
                         links(
                                 linkWithRel("self").description("Link to <<resources-accounts_create, self>>"),
-                                linkWithRel("profile").description("Link to document"),
-                                linkWithRel("get-account-list").description("Link to <<resources-accounts-list, get account list>>")
+                                linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
+                                linkWithRel("get-account-list").description("Link to <<resources-accounts-list, get account list>>"),
+                                linkWithRel("update-account").description("Link to <<resources_account_update, update an existing account>>"),
+                                linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>"),
+                                linkWithRel("profile").description("Link to document")
                         )
                 ));
     }
@@ -172,8 +168,6 @@ class AccountControllerTest extends BaseControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errors[*].message").exists())
-                .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
 
@@ -232,8 +226,6 @@ class AccountControllerTest extends BaseControllerTest {
         mockMvc.perform(get("/api/v1/accounts/10"))
                 .andExpect(header().stringValues(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("errors[*].message").exists())
-                .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
 
@@ -388,8 +380,6 @@ class AccountControllerTest extends BaseControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("errors[*].message").exists())
-                .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
 
@@ -424,8 +414,6 @@ class AccountControllerTest extends BaseControllerTest {
     void deleteNonExistentAccount() throws Exception {
         mockMvc.perform(delete("/api/v1/accounts/10"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("errors[*].message").exists())
-                .andExpect(jsonPath("_links.index.href").exists())
                 .andDo(print());
     }
 
