@@ -13,8 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -32,9 +30,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Optional<AccountDto> getAccountDetail(Long id) {
+    public AccountDto getAccountDetail(Long id) {
         return accountRepository.findById(id)
-                .map(account -> modelMapper.map(account, AccountDto.class));
+                .map(account -> modelMapper.map(account, AccountDto.class))
+                .orElseThrow(() -> new AccountNotFoundException());
     }
 
     @Override

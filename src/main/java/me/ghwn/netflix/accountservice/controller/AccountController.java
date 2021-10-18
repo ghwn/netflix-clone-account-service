@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
-import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import me.ghwn.netflix.accountservice.service.AccountService;
 import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
 import me.ghwn.netflix.accountservice.vo.AccountDetail;
@@ -55,8 +54,7 @@ public class AccountController {
 
     @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> getAccountDetail(@PathVariable Long id) {
-        AccountDto accountDto = accountService.getAccountDetail(id)
-                .orElseThrow(() -> new AccountNotFoundException());
+        AccountDto accountDto = accountService.getAccountDetail(id);
         AccountDetail accountDetail = modelMapper.map(accountDto, AccountDetail.class);
 
         EntityModel<AccountDetail> content = EntityModel.of(accountDetail);
