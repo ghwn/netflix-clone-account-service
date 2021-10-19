@@ -1,4 +1,4 @@
-package me.ghwn.netflix.accountservice.vo;
+package me.ghwn.netflix.accountservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

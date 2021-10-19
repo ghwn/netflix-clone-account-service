@@ -1,8 +1,8 @@
 package me.ghwn.netflix.accountservice.service;
 
 import me.ghwn.netflix.accountservice.dto.AccountDto;
-import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
-import me.ghwn.netflix.accountservice.vo.AccountUpdateRequest;
+import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
+import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

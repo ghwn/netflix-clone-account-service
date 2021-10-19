@@ -2,7 +2,7 @@ package me.ghwn.netflix.accountservice.mapping;
 
 import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
-import me.ghwn.netflix.accountservice.vo.AccountCreationRequest;
+import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
