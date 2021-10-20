@@ -58,25 +58,16 @@ use of HTTP status codes.
 | The requested resource did not exist
 |===
 
-[[overview_headers]]
-== Headers
-
-Every response has the following header(s):
-
-include::{snippets}/headers-example/response-headers.adoc[]
-
 [[overview_errors]]
 == Errors
 
 Whenever an error response (status code >= 400) is returned, the body will contain a JSON object
-that describes the problem. The error object has the following structure:
-
-include::{snippets}/error-example/response-fields.adoc[]
+that describes the problem. `error` and `_links.index.href` are always contained in the response.
 
 For example, a request that attempts to retrieve a non-existent account will produce a
-`400 Bad Request` response:
+`404 Not Found` response:
 
-include::{snippets}/error-example/http-response.adoc[]
+include::{snippets}/get-non-existent-account-detail/http-response.adoc[]
 
 [[overview_hypermedia]]
 == Hypermedia
@@ -104,8 +95,11 @@ The index provides the entry point into the service.
 
 A `GET` request is used to access the index
 
+==== Response Fields
 include::{snippets}/index/response-fields.adoc[]
+==== HTTP Response
 include::{snippets}/index/http-response.adoc[]
+==== Links
 include::{snippets}/index/links.adoc[]
 
 
@@ -122,8 +116,11 @@ The Accounts resources is used to create and list accounts
 
 A `GET` request will list all of the service's accounts.
 
+==== Response Fields
 include::{snippets}/get-account-list/response-fields.adoc[]
+==== cURL Request
 include::{snippets}/get-account-list/curl-request.adoc[]
+==== HTTP Response
 include::{snippets}/get-account-list/http-response.adoc[]
 
 
@@ -133,8 +130,11 @@ include::{snippets}/get-account-list/http-response.adoc[]
 
 A `POST` request is used to create an account
 
+==== Request Fields
 include::{snippets}/create-account/request-fields.adoc[]
+==== cURL Request
 include::{snippets}/create-account/curl-request.adoc[]
+==== HTTP Response
 include::{snippets}/create-account/http-response.adoc[]
 
 
@@ -151,8 +151,11 @@ The Account resource is used to retrieve, update, and delete individual accounts
 
 A `GET` request will retrieve the details of an account
 
+==== Response Fields
 include::{snippets}/get-account-detail/response-fields.adoc[]
+==== cURL Request
 include::{snippets}/get-account-detail/curl-request.adoc[]
+==== HTTP Response
 include::{snippets}/get-account-detail/http-response.adoc[]
 
 
@@ -162,8 +165,11 @@ include::{snippets}/get-account-detail/http-response.adoc[]
 
 A `PUT` request is used to update an account
 
-include::{snippets}/get-account-detail/response-fields.adoc[]
+==== Request Fields
+include::{snippets}/update-account/request-fields.adoc[]
+==== cURL Request
 include::{snippets}/update-account/curl-request.adoc[]
+==== HTTP Response
 include::{snippets}/update-account/http-response.adoc[]
 
 
@@ -173,6 +179,9 @@ include::{snippets}/update-account/http-response.adoc[]
 
 A `DELETE` request is used to delete an account
 
+==== Response Fields
 include::{snippets}/delete-account/response-fields.adoc[]
+==== cURL Request
 include::{snippets}/delete-account/curl-request.adoc[]
+==== HTTP Response
 include::{snippets}/delete-account/http-response.adoc[]

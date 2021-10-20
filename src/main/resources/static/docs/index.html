@@ -452,7 +452,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#overview_http_verbs">HTTP verbs</a></li>
 <li><a href="#overview_http_status_codes">HTTP status codes</a></li>
-<li><a href="#overview_headers">Headers</a></li>
 <li><a href="#overview_errors">Errors</a></li>
 <li><a href="#overview_hypermedia">Hypermedia</a></li>
 </ul>
@@ -461,20 +460,56 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#resources_index">Index</a>
 <ul class="sectlevel2">
-<li><a href="#resources_index_access">Accessing the index</a></li>
+<li><a href="#resources_index_access">Accessing the index</a>
+<ul class="sectlevel3">
+<li><a href="#_response_fields">Response Fields</a></li>
+<li><a href="#_http_response">HTTP Response</a></li>
+<li><a href="#_links">Links</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#resources_accounts">Accounts</a>
 <ul class="sectlevel2">
-<li><a href="#resources_accounts_list">Listing accounts</a></li>
-<li><a href="#resources_accounts_create">Creating an account</a></li>
+<li><a href="#resources_accounts_list">Listing accounts</a>
+<ul class="sectlevel3">
+<li><a href="#_response_fields_2">Response Fields</a></li>
+<li><a href="#_curl_request">cURL Request</a></li>
+<li><a href="#_http_response_2">HTTP Response</a></li>
+</ul>
+</li>
+<li><a href="#resources_accounts_create">Creating an account</a>
+<ul class="sectlevel3">
+<li><a href="#_request_fields">Request Fields</a></li>
+<li><a href="#_curl_request_2">cURL Request</a></li>
+<li><a href="#_http_response_3">HTTP Response</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#resources_account">Account</a>
 <ul class="sectlevel2">
-<li><a href="#resources_account_retrieve">Retrieve an account</a></li>
-<li><a href="#resources_account_update">Update an account</a></li>
-<li><a href="#resources_account_delete">Delete an account</a></li>
+<li><a href="#resources_account_retrieve">Retrieve an account</a>
+<ul class="sectlevel3">
+<li><a href="#_response_fields_3">Response Fields</a></li>
+<li><a href="#_curl_request_3">cURL Request</a></li>
+<li><a href="#_http_response_4">HTTP Response</a></li>
+</ul>
+</li>
+<li><a href="#resources_account_update">Update an account</a>
+<ul class="sectlevel3">
+<li><a href="#_request_fields_2">Request Fields</a></li>
+<li><a href="#_curl_request_4">cURL Request</a></li>
+<li><a href="#_http_response_5">HTTP Response</a></li>
+</ul>
+</li>
+<li><a href="#resources_account_delete">Delete an account</a>
+<ul class="sectlevel3">
+<li><a href="#_response_fields_4">Response Fields</a></li>
+<li><a href="#_curl_request_5">cURL Request</a></li>
+<li><a href="#_http_response_6">HTTP Response</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -564,32 +599,33 @@ use of HTTP status codes.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="overview_headers"><a class="link" href="#overview_headers">Headers</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Every response has the following header(s):</p>
-</div>
-<div class="paragraph">
-<p>Unresolved directive in index.adoc - include::/Users/jihwanlim/Workspace/netflix-clone/account-service/build/generated-snippets/headers-example/response-headers.adoc[]</p>
-</div>
-</div>
-</div>
-<div class="sect1">
 <h2 id="overview_errors"><a class="link" href="#overview_errors">Errors</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Whenever an error response (status code &gt;= 400) is returned, the body will contain a JSON object
-that describes the problem. The error object has the following structure:</p>
-</div>
-<div class="paragraph">
-<p>Unresolved directive in index.adoc - include::/Users/jihwanlim/Workspace/netflix-clone/account-service/build/generated-snippets/error-example/response-fields.adoc[]</p>
+that describes the problem. <code>error</code> and <code>_links.index.href</code> are always contained in the response.</p>
 </div>
 <div class="paragraph">
 <p>For example, a request that attempts to retrieve a non-existent account will produce a
-<code>400 Bad Request</code> response:</p>
+<code>404 Not Found</code> response:</p>
 </div>
-<div class="paragraph">
-<p>Unresolved directive in index.adoc - include::/Users/jihwanlim/Workspace/netflix-clone/account-service/build/generated-snippets/error-example/http-response.adoc[]</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 404 Not Found
+Content-Type: application/hal+json
+Content-Length: 147
+
+{
+  "errors" : [ {
+    "message" : "Account not found"
+  } ],
+  "_links" : {
+    "index" : {
+      "href" : "http://localhost:8080/api"
+    }
+  }
+}</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -617,6 +653,8 @@ links to navigate from resource to resource.</p>
 <div class="paragraph">
 <p>A <code>GET</code> request is used to access the index</p>
 </div>
+<div class="sect3">
+<h4 id="_response_fields"><a class="link" href="#_response_fields">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -643,6 +681,9 @@ links to navigate from resource to resource.</p>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="sect3">
+<h4 id="_http_response"><a class="link" href="#_http_response">HTTP Response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
@@ -661,6 +702,9 @@ Content-Length: 184
 }</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_links"><a class="link" href="#_links">Links</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -686,6 +730,7 @@ Content-Length: 184
 </div>
 </div>
 </div>
+</div>
 <div class="sect1">
 <h2 id="resources_accounts"><a class="link" href="#resources_accounts">Accounts</a></h2>
 <div class="sectionbody">
@@ -697,6 +742,8 @@ Content-Length: 184
 <div class="paragraph">
 <p>A <code>GET</code> request will list all of the service&#8217;s accounts.</p>
 </div>
+<div class="sect3">
+<h4 id="_response_fields_2"><a class="link" href="#_response_fields_2">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -752,11 +799,6 @@ Content-Length: 184
 <td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_accounts_create">self</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.profile.href</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Link to document</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.first.href</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Link to the first page</p></td>
@@ -775,6 +817,11 @@ Content-Length: 184
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.create-account.href</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_accounts_create">create new account</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.profile.href</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Link to document</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>page.size</code></p></td>
@@ -798,38 +845,32 @@ Content-Length: 184
 </tr>
 </tbody>
 </table>
+</div>
+<div class="sect3">
+<h4 id="_curl_request"><a class="link" href="#_curl_request">cURL Request</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">$ curl 'http://localhost:8080/api/v1/accounts' -i -X GET</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_http_response_2"><a class="link" href="#_http_response_2">HTTP Response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/hal+json
-Content-Length: 7347
+Content-Length: 7359
 
 {
   "_embedded" : {
     "accounts" : [ {
-      "id" : 3,
+      "id" : 4,
       "email" : "admin1@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.706272",
-      "updatedAt" : "2021-10-17T06:45:01.706272",
-      "_links" : {
-        "self" : {
-          "href" : "http://localhost:8080/api/v1/accounts/3"
-        }
-      }
-    }, {
-      "id" : 4,
-      "email" : "admin2@example.com",
-      "active" : true,
-      "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.707815",
-      "updatedAt" : "2021-10-17T06:45:01.707815",
+      "createdAt" : "2021-10-20T23:21:23.535975",
+      "updatedAt" : "2021-10-20T23:21:23.535975",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/4"
@@ -837,11 +878,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 5,
-      "email" : "admin3@example.com",
+      "email" : "admin2@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.70927",
-      "updatedAt" : "2021-10-17T06:45:01.70927",
+      "createdAt" : "2021-10-20T23:21:23.537504",
+      "updatedAt" : "2021-10-20T23:21:23.537504",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/5"
@@ -849,11 +890,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 6,
-      "email" : "admin4@example.com",
+      "email" : "admin3@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.710538",
-      "updatedAt" : "2021-10-17T06:45:01.710538",
+      "createdAt" : "2021-10-20T23:21:23.538744",
+      "updatedAt" : "2021-10-20T23:21:23.538744",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/6"
@@ -861,11 +902,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 7,
-      "email" : "admin5@example.com",
+      "email" : "admin4@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.711749",
-      "updatedAt" : "2021-10-17T06:45:01.711749",
+      "createdAt" : "2021-10-20T23:21:23.539872",
+      "updatedAt" : "2021-10-20T23:21:23.539872",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/7"
@@ -873,11 +914,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 8,
-      "email" : "admin6@example.com",
+      "email" : "admin5@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.71317",
-      "updatedAt" : "2021-10-17T06:45:01.71317",
+      "createdAt" : "2021-10-20T23:21:23.541106",
+      "updatedAt" : "2021-10-20T23:21:23.541106",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/8"
@@ -885,11 +926,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 9,
-      "email" : "admin7@example.com",
+      "email" : "admin6@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.71497",
-      "updatedAt" : "2021-10-17T06:45:01.71497",
+      "createdAt" : "2021-10-20T23:21:23.542561",
+      "updatedAt" : "2021-10-20T23:21:23.542561",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/9"
@@ -897,11 +938,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 10,
-      "email" : "admin8@example.com",
+      "email" : "admin7@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.716534",
-      "updatedAt" : "2021-10-17T06:45:01.716534",
+      "createdAt" : "2021-10-20T23:21:23.543861",
+      "updatedAt" : "2021-10-20T23:21:23.543861",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/10"
@@ -909,11 +950,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 11,
-      "email" : "admin9@example.com",
+      "email" : "admin8@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.718356",
-      "updatedAt" : "2021-10-17T06:45:01.718356",
+      "createdAt" : "2021-10-20T23:21:23.545023",
+      "updatedAt" : "2021-10-20T23:21:23.545023",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/11"
@@ -921,11 +962,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 12,
-      "email" : "admin10@example.com",
+      "email" : "admin9@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.719729",
-      "updatedAt" : "2021-10-17T06:45:01.719729",
+      "createdAt" : "2021-10-20T23:21:23.546185",
+      "updatedAt" : "2021-10-20T23:21:23.546185",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/12"
@@ -933,11 +974,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 13,
-      "email" : "admin11@example.com",
+      "email" : "admin10@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.721094",
-      "updatedAt" : "2021-10-17T06:45:01.721094",
+      "createdAt" : "2021-10-20T23:21:23.547385",
+      "updatedAt" : "2021-10-20T23:21:23.547385",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/13"
@@ -945,11 +986,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 14,
-      "email" : "admin12@example.com",
+      "email" : "admin11@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.722907",
-      "updatedAt" : "2021-10-17T06:45:01.722907",
+      "createdAt" : "2021-10-20T23:21:23.548686",
+      "updatedAt" : "2021-10-20T23:21:23.548686",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/14"
@@ -957,11 +998,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 15,
-      "email" : "admin13@example.com",
+      "email" : "admin12@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.72426",
-      "updatedAt" : "2021-10-17T06:45:01.72426",
+      "createdAt" : "2021-10-20T23:21:23.549769",
+      "updatedAt" : "2021-10-20T23:21:23.549769",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/15"
@@ -969,11 +1010,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 16,
-      "email" : "admin14@example.com",
+      "email" : "admin13@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.72611",
-      "updatedAt" : "2021-10-17T06:45:01.72611",
+      "createdAt" : "2021-10-20T23:21:23.551502",
+      "updatedAt" : "2021-10-20T23:21:23.551502",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/16"
@@ -981,11 +1022,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 17,
-      "email" : "admin15@example.com",
+      "email" : "admin14@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.727494",
-      "updatedAt" : "2021-10-17T06:45:01.727494",
+      "createdAt" : "2021-10-20T23:21:23.552636",
+      "updatedAt" : "2021-10-20T23:21:23.552636",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/17"
@@ -993,11 +1034,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 18,
-      "email" : "admin16@example.com",
+      "email" : "admin15@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.72868",
-      "updatedAt" : "2021-10-17T06:45:01.72868",
+      "createdAt" : "2021-10-20T23:21:23.55373",
+      "updatedAt" : "2021-10-20T23:21:23.55373",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/18"
@@ -1005,11 +1046,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 19,
-      "email" : "admin17@example.com",
+      "email" : "admin16@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.730086",
-      "updatedAt" : "2021-10-17T06:45:01.730086",
+      "createdAt" : "2021-10-20T23:21:23.554746",
+      "updatedAt" : "2021-10-20T23:21:23.554746",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/19"
@@ -1017,11 +1058,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 20,
-      "email" : "admin18@example.com",
+      "email" : "admin17@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.73123",
-      "updatedAt" : "2021-10-17T06:45:01.73123",
+      "createdAt" : "2021-10-20T23:21:23.55565",
+      "updatedAt" : "2021-10-20T23:21:23.55565",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/20"
@@ -1029,11 +1070,11 @@ Content-Length: 7347
       }
     }, {
       "id" : 21,
-      "email" : "admin19@example.com",
+      "email" : "admin18@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.732394",
-      "updatedAt" : "2021-10-17T06:45:01.732394",
+      "createdAt" : "2021-10-20T23:21:23.556574",
+      "updatedAt" : "2021-10-20T23:21:23.556574",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/21"
@@ -1041,14 +1082,26 @@ Content-Length: 7347
       }
     }, {
       "id" : 22,
-      "email" : "admin20@example.com",
+      "email" : "admin19@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-17T06:45:01.733638",
-      "updatedAt" : "2021-10-17T06:45:01.733638",
+      "createdAt" : "2021-10-20T23:21:23.557603",
+      "updatedAt" : "2021-10-20T23:21:23.557603",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/22"
+        }
+      }
+    }, {
+      "id" : 23,
+      "email" : "admin20@example.com",
+      "active" : true,
+      "roles" : [ "USER" ],
+      "createdAt" : "2021-10-20T23:21:23.558896",
+      "updatedAt" : "2021-10-20T23:21:23.558896",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost:8080/api/v1/accounts/23"
         }
       }
     } ]
@@ -1083,11 +1136,14 @@ Content-Length: 7347
 </div>
 </div>
 </div>
+</div>
 <div class="sect2">
 <h3 id="resources_accounts_create"><a class="link" href="#resources_accounts_create">Creating an account</a></h3>
 <div class="paragraph">
 <p>A <code>POST</code> request is used to create an account</p>
 </div>
+<div class="sect3">
+<h4 id="_request_fields"><a class="link" href="#_request_fields">Request Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -1124,6 +1180,9 @@ Content-Length: 7347
 </tr>
 </tbody>
 </table>
+</div>
+<div class="sect3">
+<h4 id="_curl_request_2"><a class="link" href="#_curl_request_2">cURL Request</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">$ curl 'http://localhost:8080/api/v1/accounts' -i -X POST \
@@ -1137,32 +1196,45 @@ Content-Length: 7347
 }'</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_http_response_3"><a class="link" href="#_http_response_3">HTTP Response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 201 Created
-Location: http://localhost:8080/api/v1/accounts/103
+Location: http://localhost:8080/api/v1/accounts/106
 Content-Type: application/hal+json
-Content-Length: 468
+Content-Length: 741
 
 {
-  "id" : 103,
+  "id" : 106,
   "email" : "admin@example.com",
   "active" : false,
   "roles" : [ "ADMIN", "USER" ],
-  "createdAt" : "2021-10-17T06:45:02.334301",
-  "updatedAt" : "2021-10-17T06:45:02.334301",
+  "createdAt" : "2021-10-20T23:21:24.335635",
+  "updatedAt" : "2021-10-20T23:21:24.335635",
   "_links" : {
     "self" : {
-      "href" : "http://localhost:8080/api/v1/accounts/103"
+      "href" : "http://localhost:8080/api/v1/accounts/106"
     },
-    "profile" : {
-      "href" : "/docs/index.html#resources-accounts-create"
+    "create-account" : {
+      "href" : "http://localhost:8080/api/v1/accounts/106"
     },
     "get-account-list" : {
       "href" : "http://localhost:8080/api/v1/accounts"
+    },
+    "update-account" : {
+      "href" : "http://localhost:8080/api/v1/accounts/106"
+    },
+    "delete-account" : {
+      "href" : "http://localhost:8080/api/v1/accounts/106"
+    },
+    "profile" : {
+      "href" : "/docs/index.html#resources-accounts-create"
     }
   }
 }</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -1179,6 +1251,8 @@ Content-Length: 468
 <div class="paragraph">
 <p>A <code>GET</code> request will retrieve the details of an account</p>
 </div>
+<div class="sect3">
+<h4 id="_response_fields_3"><a class="link" href="#_response_fields_3">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -1229,11 +1303,6 @@ Content-Length: 468
 <td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_account_retrieve">self</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.profile.href</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Link to document</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.get-account-list.href</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_accounts_list">get account list</a></p></td>
@@ -1253,29 +1322,40 @@ Content-Length: 468
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_account_delete">delete an existing account</a></p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.profile.href</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Link to document</p></td>
+</tr>
 </tbody>
 </table>
+</div>
+<div class="sect3">
+<h4 id="_curl_request_3"><a class="link" href="#_curl_request_3">cURL Request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">$ curl 'http://localhost:8080/api/v1/accounts/105' -i -X GET</code></pre>
+<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">$ curl 'http://localhost:8080/api/v1/accounts/108' -i -X GET</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_http_response_4"><a class="link" href="#_http_response_4">HTTP Response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/hal+json
-Content-Length: 726
+Content-Length: 722
 
 {
-  "id" : 105,
+  "id" : 108,
   "email" : "admin@example.com",
   "active" : true,
   "roles" : [ "USER" ],
-  "createdAt" : "2021-10-17T06:45:02.433806",
-  "updatedAt" : "2021-10-17T06:45:02.433806",
+  "createdAt" : "2021-10-20T23:21:24.4585",
+  "updatedAt" : "2021-10-20T23:21:24.4585",
   "_links" : {
     "self" : {
-      "href" : "http://localhost:8080/api/v1/accounts/105"
+      "href" : "http://localhost:8080/api/v1/accounts/108"
     },
     "profile" : {
       "href" : "/docs/index.html#resources-account-detail"
@@ -1287,13 +1367,14 @@ Content-Length: 726
       "href" : "http://localhost:8080/api/v1/accounts"
     },
     "update-account" : {
-      "href" : "http://localhost:8080/api/v1/accounts/105"
+      "href" : "http://localhost:8080/api/v1/accounts/108"
     },
     "delete-account" : {
-      "href" : "http://localhost:8080/api/v1/accounts/105"
+      "href" : "http://localhost:8080/api/v1/accounts/108"
     }
   }
 }</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -1302,6 +1383,8 @@ Content-Length: 726
 <div class="paragraph">
 <p>A <code>PUT</code> request is used to update an account</p>
 </div>
+<div class="sect3">
+<h4 id="_request_fields_2"><a class="link" href="#_request_fields_2">Request Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -1317,80 +1400,40 @@ Content-Length: 726
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ID of account</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Email of account</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">New password of account</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>active</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the account is active or not</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">New active status of account</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>roles</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Authorities of account</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>createdAt</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Created date and time of account</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>updatedAt</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Last updated date and time of account</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.self.href</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_account_retrieve">self</a></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.profile.href</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Link to document</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.get-account-list.href</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_accounts_list">get account list</a></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.create-account.href</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_accounts_create">create new account</a></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.update-account.href</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_account_update">update an existing account</a></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.delete-account.href</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_account_delete">delete an existing account</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">New authorities of account</p></td>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="sect3">
+<h4 id="_curl_request_4"><a class="link" href="#_curl_request_4">cURL Request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">$ curl 'http://localhost:8080/api/v1/accounts/104' -i -X PUT \
+<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">$ curl 'http://localhost:8080/api/v1/accounts/107' -i -X PUT \
     -H 'Content-Type: application/json' \
     -H 'Accept: application/hal+json' \
     -d '{
-  "email" : "newadmin@example.com",
   "password" : "newP@ssw0rd1234",
   "active" : true,
   "roles" : [ "ADMIN", "USER" ]
 }'</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_http_response_5"><a class="link" href="#_http_response_5">HTTP Response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
@@ -1398,15 +1441,15 @@ Content-Type: application/hal+json
 Content-Length: 739
 
 {
-  "id" : 104,
+  "id" : 107,
   "email" : "admin@example.com",
   "active" : true,
   "roles" : [ "ADMIN", "USER" ],
-  "createdAt" : "2021-10-17T06:45:02.377981",
-  "updatedAt" : "2021-10-17T06:45:02.377981",
+  "createdAt" : "2021-10-20T23:21:24.386847",
+  "updatedAt" : "2021-10-20T23:21:24.386847",
   "_links" : {
     "self" : {
-      "href" : "http://localhost:8080/api/v1/accounts/104"
+      "href" : "http://localhost:8080/api/v1/accounts/107"
     },
     "profile" : {
       "href" : "/docs/index.html#resources-account-update"
@@ -1418,13 +1461,14 @@ Content-Length: 739
       "href" : "http://localhost:8080/api/v1/accounts"
     },
     "get-account-detail" : {
-      "href" : "http://localhost:8080/api/v1/accounts/104"
+      "href" : "http://localhost:8080/api/v1/accounts/107"
     },
     "delete-account" : {
-      "href" : "http://localhost:8080/api/v1/accounts/104"
+      "href" : "http://localhost:8080/api/v1/accounts/107"
     }
   }
 }</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -1433,6 +1477,8 @@ Content-Length: 739
 <div class="paragraph">
 <p>A <code>DELETE</code> request is used to delete an account</p>
 </div>
+<div class="sect3">
+<h4 id="_response_fields_4"><a class="link" href="#_response_fields_4">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -1448,11 +1494,6 @@ Content-Length: 739
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.profile.href</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Link to document</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.create-account.href</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_accounts_create">create new account</a></p></td>
@@ -1462,13 +1503,24 @@ Content-Length: 739
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Link to <a href="#resources_accounts_list">get account list</a></p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>_links.profile.href</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Link to document</p></td>
+</tr>
 </tbody>
 </table>
+</div>
+<div class="sect3">
+<h4 id="_curl_request_5"><a class="link" href="#_curl_request_5">cURL Request</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">$ curl 'http://localhost:8080/api/v1/accounts/1' -i -X DELETE</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_http_response_6"><a class="link" href="#_http_response_6">HTTP Response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
@@ -1494,10 +1546,11 @@ Content-Length: 281
 </div>
 </div>
 </div>
+</div>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2021-10-17 06:44:36 +0900
+Last updated 2021-10-20 23:19:43 +0900
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -188,11 +188,11 @@ class AccountControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("createdAt").isNotEmpty())
                 .andExpect(jsonPath("updatedAt").isNotEmpty())
                 .andExpect(jsonPath("_links.self.href").exists())
-                .andExpect(jsonPath("_links.profile.href").exists())
                 .andExpect(jsonPath("_links.get-account-list.href").exists())
                 .andExpect(jsonPath("_links.create-account.href").exists())
                 .andExpect(jsonPath("_links.update-account.href").exists())
                 .andExpect(jsonPath("_links.delete-account.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists())
 
                 .andDo(documentHandler.document(
                         responseFields(
@@ -203,19 +203,19 @@ class AccountControllerTest extends BaseControllerTest {
                                 fieldWithPath("createdAt").description("Created date and time of account"),
                                 fieldWithPath("updatedAt").description("Last updated date and time of account"),
                                 fieldWithPath("_links.self.href").description("Link to <<resources_account_retrieve, self>>"),
-                                fieldWithPath("_links.profile.href").description("Link to document"),
                                 fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>"),
                                 fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
                                 fieldWithPath("_links.update-account.href").description("Link to <<resources_account_update, update an existing account>>"),
-                                fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>")
+                                fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document")
                         ),
                         links(
                                 linkWithRel("self").description("Link to <<resources_account_retrieve, self>>"),
-                                linkWithRel("profile").description("Link to document"),
                                 linkWithRel("get-account-list").description("Link to <<resources_accounts_list, get account list>>"),
                                 linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
                                 linkWithRel("update-account").description("Link to <<resources_account_update, update an existing account>>"),
-                                linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>")
+                                linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>"),
+                                linkWithRel("profile").description("Link to document")
                         )
                 ));
     }
@@ -252,11 +252,11 @@ class AccountControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_embedded.accounts[*].updatedAt").exists())
                 .andExpect(jsonPath("_embedded.accounts[*]._links.self.href").exists())
                 .andExpect(jsonPath("_links.self.href").exists())
-                .andExpect(jsonPath("_links.profile.href").exists())
                 .andExpect(jsonPath("_links.first.href").exists())
                 .andExpect(jsonPath("_links.next.href").exists())
                 .andExpect(jsonPath("_links.last.href").exists())
                 .andExpect(jsonPath("_links.create-account.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists())
                 .andExpect(jsonPath("page.size").value(20))
                 .andExpect(jsonPath("page.totalElements").exists())
                 .andExpect(jsonPath("page.totalPages").exists())
@@ -272,11 +272,11 @@ class AccountControllerTest extends BaseControllerTest {
                                 fieldWithPath("_embedded.accounts[].updatedAt").description("Last updated date and time of the account"),
                                 fieldWithPath("_embedded.accounts[]._links.self.href").description("Link to the account"),
                                 fieldWithPath("_links.self.href").description("Link to <<resources_accounts_create, self>>"),
-                                fieldWithPath("_links.profile.href").description("Link to document"),
                                 fieldWithPath("_links.first.href").description("Link to the first page"),
                                 fieldWithPath("_links.next.href").description("Link to the next page"),
                                 fieldWithPath("_links.last.href").description("Link to the last page"),
                                 fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document"),
                                 fieldWithPath("page.size").description("The number of elements per one page"),
                                 fieldWithPath("page.totalElements").description("The number of total elements"),
                                 fieldWithPath("page.totalPages").description("The number of total pages"),
@@ -284,11 +284,11 @@ class AccountControllerTest extends BaseControllerTest {
                         ),
                         links(
                                 linkWithRel("self").description("Link to <<resources_accounts_create, self>>"),
-                                linkWithRel("profile").description("Link to document"),
                                 linkWithRel("first").description("Link to the first page"),
                                 linkWithRel("next").description("Link to the next page"),
                                 linkWithRel("last").description("Link to the last page"),
-                                linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>")
+                                linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
+                                linkWithRel("profile").description("Link to document")
                         )
                 ));
     }
@@ -305,11 +305,10 @@ class AccountControllerTest extends BaseControllerTest {
         Account account = new Account(null, oldEmail, oldPassword, oldActive, oldRoles);
         accountRepository.save(account);
 
-        String newEmail = "newadmin@example.com";
         String newPassword = "newP@ssw0rd1234";
         boolean newActive = !oldActive;
         Set<String> newRoles = Set.of(AccountRole.USER.name(), AccountRole.ADMIN.name());
-        AccountCreationRequest request = new AccountCreationRequest(newEmail, newPassword, newActive, newRoles);
+        AccountUpdateRequest request = new AccountUpdateRequest(newPassword, newActive, newRoles);
 
         // when & then
         mockMvc.perform(put("/api/v1/accounts/{id}", account.getId())
@@ -318,7 +317,6 @@ class AccountControllerTest extends BaseControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id").value(account.getId()))
-                .andExpect(jsonPath("email", not(equalTo(newEmail))))
                 .andExpect(jsonPath("email").value(account.getEmail()))
                 .andExpect(jsonPath("password").doesNotExist())
                 .andExpect(jsonPath("active").value(newActive))
@@ -327,15 +325,14 @@ class AccountControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("createdAt").exists())
                 .andExpect(jsonPath("createdAt").exists())
                 .andExpect(jsonPath("_links.self.href").exists())
-                .andExpect(jsonPath("_links.profile.href").exists())
                 .andExpect(jsonPath("_links.get-account-list.href").exists())
                 .andExpect(jsonPath("_links.create-account.href").exists())
                 .andExpect(jsonPath("_links.get-account-detail.href").exists())
                 .andExpect(jsonPath("_links.delete-account.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists())
 
                 .andDo(documentHandler.document(
                         requestFields(
-                                fieldWithPath("email").description("This field is ignored"),
                                 fieldWithPath("password").description("New password of account"),
                                 fieldWithPath("active").description("New active status of account"),
                                 fieldWithPath("roles").description("New authorities of account")
@@ -348,19 +345,19 @@ class AccountControllerTest extends BaseControllerTest {
                                 fieldWithPath("createdAt").description("Created date and time of the account"),
                                 fieldWithPath("updatedAt").description("Last updated date and time of the account"),
                                 fieldWithPath("_links.self.href").description("Link to <<resources_account_retrieve, self>>"),
-                                fieldWithPath("_links.profile.href").description("Link to document"),
                                 fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>"),
                                 fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
                                 fieldWithPath("_links.get-account-detail.href").description("Link to <<resources_account_retrieve, get account detail>>"),
-                                fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>")
+                                fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document")
                         ),
                         links(
                                 linkWithRel("self").description("Link to <<resources_account_retrieve, self>>"),
-                                linkWithRel("profile").description("Link to document"),
                                 linkWithRel("get-account-list").description("Link to <<resources_accounts_list, get account list>>"),
                                 linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
                                 linkWithRel("get-account-detail").description("Link to <<resources_account_retrieve, get account detail>>"),
-                                linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>")
+                                linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>"),
+                                linkWithRel("profile").description("Link to document")
                         )
                 ));
     }
@@ -397,14 +394,14 @@ class AccountControllerTest extends BaseControllerTest {
 
                 .andDo(documentHandler.document(
                         responseFields(
-                                fieldWithPath("_links.profile.href").description("Link to document"),
                                 fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
-                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>")
+                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document")
                         ),
                         links(
-                                linkWithRel("profile").description("Link to document"),
                                 linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
-                                linkWithRel("get-account-list").description("Link to <<resources_accounts_list, get account list>>")
+                                linkWithRel("get-account-list").description("Link to <<resources_accounts_list, get account list>>"),
+                                linkWithRel("profile").description("Link to document")
                         )
                 ));
     }
@@ -418,7 +415,7 @@ class AccountControllerTest extends BaseControllerTest {
     }
 
     @Test
-    @DisplayName("Check if _embedded.accounts array does still exist when there are no accounts")
+    @DisplayName("_embedded.accounts array should not be disappeared when there are no saved accounts in database")
     void keepEmbeddedAccountsArrayWhenNoAccounts() throws Exception {
         mockMvc.perform(get("/api/v1/accounts"))
                 .andExpect(jsonPath("_embedded.accounts").exists())
