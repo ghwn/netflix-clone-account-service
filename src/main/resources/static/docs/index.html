@@ -613,6 +613,12 @@ that describes the problem. <code>error</code> and <code>_links.index.href</code
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 404 Not Found
 Content-Type: application/hal+json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
 Content-Length: 147
 
 {
@@ -688,6 +694,12 @@ links to navigate from resource to resource.</p>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/hal+json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
 Content-Length: 184
 
 {
@@ -860,6 +872,12 @@ Content-Length: 184
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/hal+json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
 Content-Length: 7359
 
 {
@@ -869,8 +887,8 @@ Content-Length: 7359
       "email" : "admin1@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.535975",
-      "updatedAt" : "2021-10-20T23:21:23.535975",
+      "createdAt" : "2021-10-20T23:50:06.052512",
+      "updatedAt" : "2021-10-20T23:50:06.052512",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/4"
@@ -881,8 +899,8 @@ Content-Length: 7359
       "email" : "admin2@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.537504",
-      "updatedAt" : "2021-10-20T23:21:23.537504",
+      "createdAt" : "2021-10-20T23:50:06.053877",
+      "updatedAt" : "2021-10-20T23:50:06.053877",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/5"
@@ -893,8 +911,8 @@ Content-Length: 7359
       "email" : "admin3@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.538744",
-      "updatedAt" : "2021-10-20T23:21:23.538744",
+      "createdAt" : "2021-10-20T23:50:06.05516",
+      "updatedAt" : "2021-10-20T23:50:06.05516",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/6"
@@ -905,8 +923,8 @@ Content-Length: 7359
       "email" : "admin4@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.539872",
-      "updatedAt" : "2021-10-20T23:21:23.539872",
+      "createdAt" : "2021-10-20T23:50:06.05635",
+      "updatedAt" : "2021-10-20T23:50:06.05635",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/7"
@@ -917,8 +935,8 @@ Content-Length: 7359
       "email" : "admin5@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.541106",
-      "updatedAt" : "2021-10-20T23:21:23.541106",
+      "createdAt" : "2021-10-20T23:50:06.057585",
+      "updatedAt" : "2021-10-20T23:50:06.057585",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/8"
@@ -929,8 +947,8 @@ Content-Length: 7359
       "email" : "admin6@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.542561",
-      "updatedAt" : "2021-10-20T23:21:23.542561",
+      "createdAt" : "2021-10-20T23:50:06.059361",
+      "updatedAt" : "2021-10-20T23:50:06.059361",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/9"
@@ -941,8 +959,8 @@ Content-Length: 7359
       "email" : "admin7@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.543861",
-      "updatedAt" : "2021-10-20T23:21:23.543861",
+      "createdAt" : "2021-10-20T23:50:06.060581",
+      "updatedAt" : "2021-10-20T23:50:06.060581",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/10"
@@ -953,8 +971,8 @@ Content-Length: 7359
       "email" : "admin8@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.545023",
-      "updatedAt" : "2021-10-20T23:21:23.545023",
+      "createdAt" : "2021-10-20T23:50:06.061839",
+      "updatedAt" : "2021-10-20T23:50:06.061839",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/11"
@@ -965,8 +983,8 @@ Content-Length: 7359
       "email" : "admin9@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.546185",
-      "updatedAt" : "2021-10-20T23:21:23.546185",
+      "createdAt" : "2021-10-20T23:50:06.063001",
+      "updatedAt" : "2021-10-20T23:50:06.063001",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/12"
@@ -977,8 +995,8 @@ Content-Length: 7359
       "email" : "admin10@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.547385",
-      "updatedAt" : "2021-10-20T23:21:23.547385",
+      "createdAt" : "2021-10-20T23:50:06.064206",
+      "updatedAt" : "2021-10-20T23:50:06.064206",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/13"
@@ -989,8 +1007,8 @@ Content-Length: 7359
       "email" : "admin11@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.548686",
-      "updatedAt" : "2021-10-20T23:21:23.548686",
+      "createdAt" : "2021-10-20T23:50:06.065539",
+      "updatedAt" : "2021-10-20T23:50:06.065539",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/14"
@@ -1001,8 +1019,8 @@ Content-Length: 7359
       "email" : "admin12@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.549769",
-      "updatedAt" : "2021-10-20T23:21:23.549769",
+      "createdAt" : "2021-10-20T23:50:06.066583",
+      "updatedAt" : "2021-10-20T23:50:06.066583",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/15"
@@ -1013,8 +1031,8 @@ Content-Length: 7359
       "email" : "admin13@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.551502",
-      "updatedAt" : "2021-10-20T23:21:23.551502",
+      "createdAt" : "2021-10-20T23:50:06.068326",
+      "updatedAt" : "2021-10-20T23:50:06.068326",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/16"
@@ -1025,8 +1043,8 @@ Content-Length: 7359
       "email" : "admin14@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.552636",
-      "updatedAt" : "2021-10-20T23:21:23.552636",
+      "createdAt" : "2021-10-20T23:50:06.069319",
+      "updatedAt" : "2021-10-20T23:50:06.069319",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/17"
@@ -1037,8 +1055,8 @@ Content-Length: 7359
       "email" : "admin15@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.55373",
-      "updatedAt" : "2021-10-20T23:21:23.55373",
+      "createdAt" : "2021-10-20T23:50:06.070417",
+      "updatedAt" : "2021-10-20T23:50:06.070417",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/18"
@@ -1049,8 +1067,8 @@ Content-Length: 7359
       "email" : "admin16@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.554746",
-      "updatedAt" : "2021-10-20T23:21:23.554746",
+      "createdAt" : "2021-10-20T23:50:06.071441",
+      "updatedAt" : "2021-10-20T23:50:06.071441",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/19"
@@ -1061,8 +1079,8 @@ Content-Length: 7359
       "email" : "admin17@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.55565",
-      "updatedAt" : "2021-10-20T23:21:23.55565",
+      "createdAt" : "2021-10-20T23:50:06.072384",
+      "updatedAt" : "2021-10-20T23:50:06.072384",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/20"
@@ -1073,8 +1091,8 @@ Content-Length: 7359
       "email" : "admin18@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.556574",
-      "updatedAt" : "2021-10-20T23:21:23.556574",
+      "createdAt" : "2021-10-20T23:50:06.073451",
+      "updatedAt" : "2021-10-20T23:50:06.073451",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/21"
@@ -1085,8 +1103,8 @@ Content-Length: 7359
       "email" : "admin19@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.557603",
-      "updatedAt" : "2021-10-20T23:21:23.557603",
+      "createdAt" : "2021-10-20T23:50:06.074444",
+      "updatedAt" : "2021-10-20T23:50:06.074444",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/22"
@@ -1097,8 +1115,8 @@ Content-Length: 7359
       "email" : "admin20@example.com",
       "active" : true,
       "roles" : [ "USER" ],
-      "createdAt" : "2021-10-20T23:21:23.558896",
-      "updatedAt" : "2021-10-20T23:21:23.558896",
+      "createdAt" : "2021-10-20T23:50:06.075382",
+      "updatedAt" : "2021-10-20T23:50:06.075382",
       "_links" : {
         "self" : {
           "href" : "http://localhost:8080/api/v1/accounts/23"
@@ -1192,7 +1210,7 @@ Content-Length: 7359
   "email" : "admin@example.com",
   "password" : "P@ssw0rd1234",
   "active" : false,
-  "roles" : [ "ADMIN", "USER" ]
+  "roles" : [ "USER", "ADMIN" ]
 }'</code></pre>
 </div>
 </div>
@@ -1204,6 +1222,12 @@ Content-Length: 7359
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 201 Created
 Location: http://localhost:8080/api/v1/accounts/106
 Content-Type: application/hal+json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
 Content-Length: 741
 
 {
@@ -1211,8 +1235,8 @@ Content-Length: 741
   "email" : "admin@example.com",
   "active" : false,
   "roles" : [ "ADMIN", "USER" ],
-  "createdAt" : "2021-10-20T23:21:24.335635",
-  "updatedAt" : "2021-10-20T23:21:24.335635",
+  "createdAt" : "2021-10-20T23:50:06.861565",
+  "updatedAt" : "2021-10-20T23:50:06.861565",
   "_links" : {
     "self" : {
       "href" : "http://localhost:8080/api/v1/accounts/106"
@@ -1344,15 +1368,21 @@ Content-Length: 741
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/hal+json
-Content-Length: 722
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Length: 726
 
 {
   "id" : 108,
   "email" : "admin@example.com",
   "active" : true,
   "roles" : [ "USER" ],
-  "createdAt" : "2021-10-20T23:21:24.4585",
-  "updatedAt" : "2021-10-20T23:21:24.4585",
+  "createdAt" : "2021-10-20T23:50:06.966444",
+  "updatedAt" : "2021-10-20T23:50:06.966444",
   "_links" : {
     "self" : {
       "href" : "http://localhost:8080/api/v1/accounts/108"
@@ -1427,7 +1457,7 @@ Content-Length: 722
     -d '{
   "password" : "newP@ssw0rd1234",
   "active" : true,
-  "roles" : [ "ADMIN", "USER" ]
+  "roles" : [ "USER", "ADMIN" ]
 }'</code></pre>
 </div>
 </div>
@@ -1438,6 +1468,12 @@ Content-Length: 722
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/hal+json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
 Content-Length: 739
 
 {
@@ -1445,8 +1481,8 @@ Content-Length: 739
   "email" : "admin@example.com",
   "active" : true,
   "roles" : [ "ADMIN", "USER" ],
-  "createdAt" : "2021-10-20T23:21:24.386847",
-  "updatedAt" : "2021-10-20T23:21:24.386847",
+  "createdAt" : "2021-10-20T23:50:06.904765",
+  "updatedAt" : "2021-10-20T23:50:06.904765",
   "_links" : {
     "self" : {
       "href" : "http://localhost:8080/api/v1/accounts/107"
@@ -1525,6 +1561,12 @@ Content-Length: 739
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/hal+json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
 Content-Length: 281
 
 {

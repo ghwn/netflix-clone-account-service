@@ -10,8 +10,16 @@ import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,11 +28,22 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
+        Set<SimpleGrantedAuthority> authorities = account.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                .collect(Collectors.toSet());
+        return new User(account.getEmail(), account.getPassword(), authorities);
+    }
 
     @Transactional
     @Override
     public AccountDto createAccount(AccountCreationRequest request) {
         Account account = modelMapper.map(request, Account.class);
+        account.setPassword(passwordEncoder.encode(request.getPassword()));
         accountRepository.save(account);
         return modelMapper.map(account, AccountDto.class);
     }
