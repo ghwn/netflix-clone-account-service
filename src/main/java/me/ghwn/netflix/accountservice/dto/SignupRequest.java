@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Getter @Setter @NoArgsConstructor
 @AllArgsConstructor
-public class AccountCreationRequest {
+public class SignupRequest {
 
     @Email(message = "Invalid email format")
     @NotEmpty(message = "Email address is required")

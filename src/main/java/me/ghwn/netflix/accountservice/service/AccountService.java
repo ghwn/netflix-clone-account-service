@@ -1,7 +1,7 @@
 package me.ghwn.netflix.accountservice.service;
 
 import me.ghwn.netflix.accountservice.dto.AccountDto;
-import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
+import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +14,7 @@ public interface AccountService extends UserDetailsService {
     @Override
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 
-    AccountDto createAccount(AccountCreationRequest request);
+    AccountDto createAccount(SignupRequest request);
 
     AccountDto getAccount(Long id);
 

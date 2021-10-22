@@ -1,8 +1,8 @@
 package me.ghwn.netflix.accountservice.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
-import me.ghwn.netflix.accountservice.dto.AccountLoginRequest;
+import me.ghwn.netflix.accountservice.dto.SignupRequest;
+import me.ghwn.netflix.accountservice.dto.LoginRequest;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.service.AccountService;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,12 +47,12 @@ public class LoginTest {
     @DisplayName("Issue new JWT token")
     void issueJwtToken() throws Exception {
         // Sign up
-        AccountCreationRequest signupRequest = new AccountCreationRequest(
+        SignupRequest signupRequest = new SignupRequest(
                 "user@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER.name()));
         accountService.createAccount(signupRequest);
 
         // Login
-        AccountLoginRequest loginRequest = modelMapper.map(signupRequest, AccountLoginRequest.class);
+        LoginRequest loginRequest = modelMapper.map(signupRequest, LoginRequest.class);
         mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest))

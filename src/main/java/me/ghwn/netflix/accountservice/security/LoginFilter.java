@@ -1,7 +1,7 @@
 package me.ghwn.netflix.accountservice.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.ghwn.netflix.accountservice.dto.AccountLoginRequest;
+import me.ghwn.netflix.accountservice.dto.LoginRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,11 +35,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
         String email, password;
         try {
-            AccountLoginRequest accountLoginRequest = new ObjectMapper()
-                    .readValue(request.getInputStream(), AccountLoginRequest.class);
-            email = accountLoginRequest.getEmail();
+            LoginRequest loginRequest = new ObjectMapper()
+                    .readValue(request.getInputStream(), LoginRequest.class);
+            email = loginRequest.getEmail();
             email = (email != null) ? email.trim() : "";
-            password = accountLoginRequest.getPassword();
+            password = loginRequest.getPassword();
             password = (password != null) ? password : "";
         } catch (IOException e) {
             email = "";

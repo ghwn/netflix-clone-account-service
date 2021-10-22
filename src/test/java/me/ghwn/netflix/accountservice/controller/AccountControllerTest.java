@@ -1,6 +1,6 @@
 package me.ghwn.netflix.accountservice.controller;
 
-import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
+import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
@@ -40,7 +40,7 @@ class AccountControllerTest extends BaseControllerTest {
         String email = "admin@example.com";
         String password = "P@ssw0rd1234";
 
-        AccountCreationRequest request = new AccountCreationRequest();
+        SignupRequest request = new SignupRequest();
         request.setEmail(email);
         request.setPassword(password);
 
@@ -59,7 +59,7 @@ class AccountControllerTest extends BaseControllerTest {
         boolean active = false;
         Set<String> roles = Set.of("USER", "HELLO");
 
-        AccountCreationRequest request = new AccountCreationRequest(email, password, active, roles);
+        SignupRequest request = new SignupRequest(email, password, active, roles);
         mockMvc.perform(post("/api/v1/accounts")
                         .accept(MediaTypes.HAL_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +75,7 @@ class AccountControllerTest extends BaseControllerTest {
         Set<String> roles = Set.of("USER", "ADMIN");
         boolean active = false;
 
-        AccountCreationRequest request = new AccountCreationRequest();
+        SignupRequest request = new SignupRequest();
         request.setEmail(email);
         request.setPassword(password);
         request.setActive(active);
@@ -141,7 +141,7 @@ class AccountControllerTest extends BaseControllerTest {
         boolean active = false;
         Set<String> roles = Set.of("USER", "ADMIN");
 
-        AccountCreationRequest request = new AccountCreationRequest(email, password, active, roles);
+        SignupRequest request = new SignupRequest(email, password, active, roles);
 
         mockMvc.perform(post("/api/v1/accounts")
                         .accept(MediaTypes.HAL_JSON)
@@ -161,7 +161,7 @@ class AccountControllerTest extends BaseControllerTest {
         boolean active = false;
         Set<String> roles = Set.of("USER", "ADMIN");
 
-        AccountCreationRequest request = new AccountCreationRequest(email, password, active, roles);
+        SignupRequest request = new SignupRequest(email, password, active, roles);
 
         mockMvc.perform(post("/api/v1/accounts")
                         .accept(MediaTypes.HAL_JSON)
@@ -369,7 +369,7 @@ class AccountControllerTest extends BaseControllerTest {
         String newPassword = "newP@ssw0rd1234";
         boolean newActive = true;
         Set<String> newRoles = Set.of(AccountRole.USER.name(), AccountRole.ADMIN.name());
-        AccountCreationRequest request = new AccountCreationRequest(newEmail, newPassword, newActive, newRoles);
+        SignupRequest request = new SignupRequest(newEmail, newPassword, newActive, newRoles);
 
         // when & then
         mockMvc.perform(put("/api/v1/accounts/10")

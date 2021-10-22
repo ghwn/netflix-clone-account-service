@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.service.AccountService;
-import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
+import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.dto.AccountDetail;
 import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import org.modelmapper.ModelMapper;
@@ -34,7 +34,7 @@ public class AccountController {
     private final ModelMapper modelMapper;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaTypes.HAL_JSON_VALUE)
-    public ResponseEntity<?> createAccount(@Valid @RequestBody AccountCreationRequest request,
+    public ResponseEntity<?> createAccount(@Valid @RequestBody SignupRequest request,
                                            BindingResult bindingResult) throws BindException {
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);

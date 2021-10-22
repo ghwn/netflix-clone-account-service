@@ -1,7 +1,7 @@
 package me.ghwn.netflix.accountservice.service;
 
 import lombok.RequiredArgsConstructor;
-import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
+import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
 import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import me.ghwn.netflix.accountservice.entity.Account;
@@ -41,7 +41,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional
     @Override
-    public AccountDto createAccount(AccountCreationRequest request) {
+    public AccountDto createAccount(SignupRequest request) {
         Account account = modelMapper.map(request, Account.class);
         account.setPassword(passwordEncoder.encode(request.getPassword()));
         accountRepository.save(account);

@@ -2,7 +2,7 @@ package me.ghwn.netflix.accountservice.mapping;
 
 import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
-import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
+import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -25,7 +25,7 @@ public class AccountMappingTest {
         String email = "admin@example.com";
         String password = "P@ssw0rd1234";
 
-        AccountCreationRequest request = new AccountCreationRequest();
+        SignupRequest request = new SignupRequest();
         request.setEmail(email);
         request.setPassword(password);
 
