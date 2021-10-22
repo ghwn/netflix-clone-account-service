@@ -33,3 +33,7 @@ logging.level:
   me.ghwn.netflix.accountservice: DEBUG
   org.hibernate.SQL: DEBUG
   org.hibernate.type: TRACE
+
+jwt:
+  secret: bXluYW1laXNqaWh3YW5saW1hbmRub3dvY3RvYmVyMjJmcmlkYXlhbmRpYW12ZXJ5dGlyZWRiZWNhdXNlaWp1c3RzdHJpa2VteWJvZHlpbmd5bQ==
+  expires-in-seconds: 3600

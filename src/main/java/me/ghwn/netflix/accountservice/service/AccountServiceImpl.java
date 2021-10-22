@@ -1,17 +1,17 @@
 package me.ghwn.netflix.accountservice.service;
 
 import lombok.RequiredArgsConstructor;
+import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
+import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
-import me.ghwn.netflix.accountservice.dto.AccountCreationRequest;
-import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
+import me.ghwn.netflix.accountservice.security.AccountContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,7 +36,7 @@ public class AccountServiceImpl implements AccountService {
         Set<SimpleGrantedAuthority> authorities = account.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .collect(Collectors.toSet());
-        return new User(account.getEmail(), account.getPassword(), authorities);
+        return new AccountContext(account, authorities);
     }
 
     @Transactional
@@ -49,8 +49,15 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountDto getAccountDetail(Long id) {
+    public AccountDto getAccount(Long id) {
         return accountRepository.findById(id)
+                .map(account -> modelMapper.map(account, AccountDto.class))
+                .orElseThrow(() -> new AccountNotFoundException());
+    }
+
+    @Override
+    public AccountDto getAccount(String email) {
+        return accountRepository.findByEmail(email)
                 .map(account -> modelMapper.map(account, AccountDto.class))
                 .orElseThrow(() -> new AccountNotFoundException());
     }

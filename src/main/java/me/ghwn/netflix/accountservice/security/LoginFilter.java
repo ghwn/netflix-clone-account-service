@@ -1,4 +1,4 @@
-package me.ghwn.netflix.accountservice.filter;
+package me.ghwn.netflix.accountservice.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.ghwn.netflix.accountservice.dto.AccountLoginRequest;
@@ -9,18 +9,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class EmailPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
-    public EmailPasswordAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public LoginFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
 
+    /**
+     * Attempt authentication by obtaining an email and a password from request.
+     * The actual authentication process will be entrusted to authentication manager.
+     * @param request
+     * @param response
+     * @return Authentication
+     * @throws AuthenticationException
+     */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
@@ -43,13 +49,5 @@ public class EmailPasswordAuthenticationFilter extends UsernamePasswordAuthentic
         // Allow subclasses to set the "details" property
         setDetails(request, authRequest);
         return this.getAuthenticationManager().authenticate(authRequest);
-    }
-
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request,
-                                            HttpServletResponse response,
-                                            FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
-        // Do nothing
     }
 }

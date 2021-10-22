@@ -57,7 +57,7 @@ public class AccountController {
 
     @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> getAccountDetail(@PathVariable Long id) {
-        AccountDto accountDto = accountService.getAccountDetail(id);
+        AccountDto accountDto = accountService.getAccount(id);
         AccountDetail accountDetail = modelMapper.map(accountDto, AccountDetail.class);
 
         EntityModel<AccountDetail> content = EntityModel.of(accountDetail);
