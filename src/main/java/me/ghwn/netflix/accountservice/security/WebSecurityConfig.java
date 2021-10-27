@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.servlet.Filter;
@@ -47,6 +48,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
 
                 .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+                .and()
                 .addFilter(buildAuthenticationFilter());
     }
 
@@ -58,7 +62,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private Filter buildAuthenticationFilter() throws Exception {
         LoginFilter filter = new LoginFilter(authenticationManager());
         String secret = Objects.requireNonNull(env.getProperty("jwt.secret"));
-        Long expiresInSeconds = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.expires-in-seconds")));
+        Long expiresInSeconds = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.expires-in-seconds", "3600")));
         filter.setAuthenticationSuccessHandler(new LoginSuccessHandler(secret, expiresInSeconds));
         return filter;
     }
