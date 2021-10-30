@@ -5,17 +5,6 @@ spring:
   application:
     name: account-service
 
-  jpa:
-    hibernate:
-      ddl-auto: create
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        format_sql: true
-        use_sql_comments: false
-        default_batch_fetch_size: 100
-    open-in-view: false
-
 eureka:
   client:
     register-with-eureka: true
