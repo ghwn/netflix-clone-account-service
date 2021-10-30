@@ -2,12 +2,12 @@ package me.ghwn.netflix.accountservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.ghwn.netflix.accountservice.dto.AccountDetail;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
+import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
+import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.service.AccountService;
-import me.ghwn.netflix.accountservice.dto.SignupRequest;
-import me.ghwn.netflix.accountservice.dto.AccountDetail;
-import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,12 +15,17 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -48,29 +53,37 @@ public class AccountController {
         Link selfLink = linkTo(getClass()).slash(createdAccountDto.getId()).withSelfRel();
         content.add(selfLink);
         content.add(selfLink.withRel("create-account"));
-        content.add(linkTo(getClass()).withRel("get-account-list"));
-        content.add(linkTo(getClass()).slash(createdAccountDto.getId()).withRel("update-account"));
-        content.add(linkTo(getClass()).slash(createdAccountDto.getId()).withRel("delete-account"));
         content.add(Link.of("/docs/index.html#resources-accounts-create").withRel("profile"));
         return ResponseEntity.created(selfLink.toUri()).body(content);
     }
 
+    @Secured({"ROLE_USER", "ROLE_ADMIN"})
     @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
-    public ResponseEntity<?> getAccountDetail(@PathVariable Long id) {
+    public ResponseEntity<?> getAccountDetail(@PathVariable Long id, @AuthenticationPrincipal User user) {
         AccountDto accountDto = accountService.getAccount(id);
+
+        // Non-admin accounts cannot request other account's details.
+        Set<String> requestRoles = extractAccountRoleNames(user);
+        if (!requestRoles.contains(AccountRole.ADMIN.name()) && !user.getUsername().equals(accountDto.getEmail())) {
+            throw new AccessDeniedException("Access is denied");
+        }
+
         AccountDetail accountDetail = modelMapper.map(accountDto, AccountDetail.class);
 
         EntityModel<AccountDetail> content = EntityModel.of(accountDetail);
         Link selfLink = linkTo(getClass()).slash(id).withSelfRel();
         content.add(selfLink);
         content.add(Link.of("/docs/index.html#resources-account-detail").withRel("profile"));
-        content.add(linkTo(getClass()).withRel("get-account-list"));
+        if (requestRoles.contains(AccountRole.ADMIN.name())) {
+            content.add(linkTo(getClass()).withRel("get-account-list"));
+        }
         content.add(linkTo(getClass()).withRel("create-account"));
         content.add(selfLink.withRel("update-account"));
         content.add(selfLink.withRel("delete-account"));
         return ResponseEntity.ok(content);
     }
 
+    @Secured({"ROLE_ADMIN"})
     @GetMapping(produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> getAccountList(Pageable pageable, PagedResourcesAssembler<AccountDto> assembler) {
         Page<AccountDto> accountList = accountService.getAccountList(pageable);
@@ -92,10 +105,20 @@ public class AccountController {
         return ResponseEntity.ok(content);
     }
 
+    @Secured({"ROLE_USER", "ROLE_ADMIN"})
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> updateAccount(@PathVariable Long id,
                                            @Valid @RequestBody AccountUpdateRequest request,
-                                           BindingResult bindingResult) throws BindException {
+                                           BindingResult bindingResult,
+                                           @AuthenticationPrincipal User user) throws BindException {
+        AccountDto accountDto = accountService.getAccount(id);
+
+        // Non-admin accounts cannot update other accounts.
+        Set<String> requestRoles = extractAccountRoleNames(user);
+        if (!requestRoles.contains(AccountRole.ADMIN.name()) && !user.getUsername().equals(accountDto.getEmail())) {
+            throw new AccessDeniedException("Access is denied");
+        }
+
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
         }
@@ -108,20 +131,34 @@ public class AccountController {
         Link selfLink = linkTo(getClass()).slash(updatedAccountDto.getId()).withSelfRel();
         content.add(selfLink);
         content.add(Link.of("/docs/index.html#resources-account-update").withRel("profile"));
-        content.add(linkTo(getClass()).withRel("get-account-list"));
+        if (requestRoles.contains(AccountRole.ADMIN.name())) {
+            content.add(linkTo(getClass()).withRel("get-account-list"));
+        }
         content.add(linkTo(getClass()).withRel("create-account"));
         content.add(linkTo(getClass()).slash(id).withRel("get-account-detail"));
         content.add(linkTo(getClass()).slash(id).withRel("delete-account"));
         return ResponseEntity.ok().body(content);
     }
 
+    @Secured({"ROLE_USER", "ROLE_ADMIN"})
     @DeleteMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
-    public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
+    public ResponseEntity<?> deleteAccount(@PathVariable Long id,
+                                           @AuthenticationPrincipal User user) {
+        AccountDto accountDto = accountService.getAccount(id);
+
+        // Non-admin accounts cannot delete other accounts.
+        Set<String> requestRoles = extractAccountRoleNames(user);
+        if (!requestRoles.contains(AccountRole.ADMIN.name()) && !user.getUsername().equals(accountDto.getEmail())) {
+            throw new AccessDeniedException("Access is denied");
+        }
+
         accountService.deleteAccount(id);
         RepresentationModel<?> content = RepresentationModel.of(null);
         content.add(Link.of("/docs/index.html#resources-account-delete").withRel("profile"));
-        content.add(linkTo(getClass()).withRel("get-account-list"));
         content.add(linkTo(getClass()).withRel("create-account"));
+        if (requestRoles.contains(AccountRole.ADMIN.name())) {
+            content.add(linkTo(getClass()).withRel("get-account-list"));
+        }
         return ResponseEntity.ok().body(content);
     }
 
@@ -135,5 +172,12 @@ public class AccountController {
                 throw new IllegalArgumentException("Invalid account role contained");
             }
         }
+    }
+
+    private Set<String> extractAccountRoleNames(User user) {
+        return user.getAuthorities().stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .map(authority -> authority.replace("ROLE_", ""))
+                .collect(Collectors.toSet());
     }
 }

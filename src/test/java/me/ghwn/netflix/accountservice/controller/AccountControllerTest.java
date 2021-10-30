@@ -1,10 +1,12 @@
 package me.ghwn.netflix.accountservice.controller;
 
-import me.ghwn.netflix.accountservice.dto.SignupRequest;
+import me.ghwn.netflix.accountservice.dto.AccountDto;
 import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
+import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
+import me.ghwn.netflix.accountservice.service.AccountService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,12 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.Rollback;
+import org.springframework.security.test.context.support.WithMockUser;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -33,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AccountControllerTest extends BaseControllerTest {
 
     @Autowired AccountRepository accountRepository;
+    @Autowired AccountService accountService;
 
     @Test
     @DisplayName("Create new account successfully by passing required fields only")
@@ -96,9 +99,6 @@ class AccountControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("updatedAt", notNullValue()))
                 .andExpect(jsonPath("_links.self.href").exists())
                 .andExpect(jsonPath("_links.create-account.href").exists())
-                .andExpect(jsonPath("_links.get-account-list.href").exists())
-                .andExpect(jsonPath("_links.update-account.href").exists())
-                .andExpect(jsonPath("_links.delete-account.href").exists())
                 .andExpect(jsonPath("_links.profile.href").exists())
 
                 .andDo(documentHandler.document(
@@ -117,17 +117,11 @@ class AccountControllerTest extends BaseControllerTest {
                                 fieldWithPath("updatedAt").description("Last updated date and time of the account"),
                                 fieldWithPath("_links.self.href").description("Link to <<resources_accounts_create, self>>"),
                                 fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
-                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>"),
-                                fieldWithPath("_links.update-account.href").description("Link to <<resources_account_update, update an existing account>>"),
-                                fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>"),
                                 fieldWithPath("_links.profile.href").description("Link to document")
                         ),
                         links(
                                 linkWithRel("self").description("Link to <<resources-accounts_create, self>>"),
                                 linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
-                                linkWithRel("get-account-list").description("Link to <<resources-accounts-list, get account list>>"),
-                                linkWithRel("update-account").description("Link to <<resources_account_update, update an existing account>>"),
-                                linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>"),
                                 linkWithRel("profile").description("Link to document")
                         )
                 ));
@@ -173,9 +167,14 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Get an existing account successfully")
+    @WithMockUser(username = "user@example.com")
     void getAccountDetail() throws Exception {
-        Account account = new Account(null, "admin@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER));
-        accountRepository.save(account);
+        AccountDto account = accountService.createAccount(new SignupRequest(
+                "user@example.com",
+                "P@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name())
+        ));
 
         mockMvc.perform(get("/api/v1/accounts/{id}", account.getId()))
                 .andExpect(status().isOk())
@@ -184,11 +183,11 @@ class AccountControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("email").value(account.getEmail()))
                 .andExpect(jsonPath("password").doesNotExist())
                 .andExpect(jsonPath("active").value(account.isActive()))
-                .andExpect(jsonPath("roles").value(account.getRoles().stream().map(role -> role.name()).collect(Collectors.toList())))
+                .andExpect(jsonPath("roles").value(new ArrayList<>(account.getRoles())))
                 .andExpect(jsonPath("createdAt").isNotEmpty())
                 .andExpect(jsonPath("updatedAt").isNotEmpty())
                 .andExpect(jsonPath("_links.self.href").exists())
-                .andExpect(jsonPath("_links.get-account-list.href").exists())
+                .andExpect(jsonPath("_links.get-account-list.href").doesNotExist())
                 .andExpect(jsonPath("_links.create-account.href").exists())
                 .andExpect(jsonPath("_links.update-account.href").exists())
                 .andExpect(jsonPath("_links.delete-account.href").exists())
@@ -203,7 +202,6 @@ class AccountControllerTest extends BaseControllerTest {
                                 fieldWithPath("createdAt").description("Created date and time of account"),
                                 fieldWithPath("updatedAt").description("Last updated date and time of account"),
                                 fieldWithPath("_links.self.href").description("Link to <<resources_account_retrieve, self>>"),
-                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>"),
                                 fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
                                 fieldWithPath("_links.update-account.href").description("Link to <<resources_account_update, update an existing account>>"),
                                 fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>"),
@@ -211,7 +209,6 @@ class AccountControllerTest extends BaseControllerTest {
                         ),
                         links(
                                 linkWithRel("self").description("Link to <<resources_account_retrieve, self>>"),
-                                linkWithRel("get-account-list").description("Link to <<resources_accounts_list, get account list>>"),
                                 linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
                                 linkWithRel("update-account").description("Link to <<resources_account_update, update an existing account>>"),
                                 linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>"),
@@ -221,7 +218,122 @@ class AccountControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @DisplayName("Try to get other account detail with user role")
+    @WithMockUser(username = "user1@example.com")
+    void getOtherAccountDetailWithUserRole() throws Exception {
+        AccountDto account = accountService.createAccount(new SignupRequest(
+                "user2@example.com",
+                "P@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name())
+        ));
+        mockMvc.perform(get("/api/v1/accounts/{id}", account.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Try to update other account with user role")
+    @WithMockUser(username = "user1@example.com")
+    void updateOtherAccountWithUserRole() throws Exception {
+        AccountDto account = accountService.createAccount(new SignupRequest(
+                "user2@example.com",
+                "P@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name())
+        ));
+        AccountUpdateRequest request = new AccountUpdateRequest(
+                "newP@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name(), AccountRole.ADMIN.name())
+        );
+        mockMvc.perform(put("/api/v1/accounts/{id}", account.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .characterEncoding(StandardCharsets.UTF_8.name()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Try to delete other account with user role")
+    @WithMockUser(username = "user1@example.com")
+    void deleteOtherAccountWithUserRole() throws Exception {
+        AccountDto account = accountService.createAccount(new SignupRequest(
+                "user2@example.com",
+                "P@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name())
+        ));
+        mockMvc.perform(delete("/api/v1/accounts/{id}", account.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Get other account detail with admin role")
+    @WithMockUser(username = "user1@example.com", roles = {"USER", "ADMIN"})
+    void getOtherAccountDetailWithAdminRole() throws Exception {
+        AccountDto account = accountService.createAccount(new SignupRequest(
+                "user2@example.com",
+                "P@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name())
+        ));
+        mockMvc.perform(get("/api/v1/accounts/{id}", account.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("_links.get-account-list.href").exists())
+                .andExpect(jsonPath("_links.create-account.href").exists())
+                .andExpect(jsonPath("_links.update-account.href").exists())
+                .andExpect(jsonPath("_links.delete-account.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists());
+    }
+
+    @Test
+    @DisplayName("Update other account with admin role")
+    @WithMockUser(username = "user1@example.com", roles = {"USER", "ADMIN"})
+    void updateOtherAccountWithAdminRole() throws Exception {
+        AccountDto account = accountService.createAccount(new SignupRequest(
+                "user2@example.com",
+                "P@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name())
+        ));
+        AccountUpdateRequest request = new AccountUpdateRequest(
+                "newP@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name(), AccountRole.ADMIN.name())
+        );
+        mockMvc.perform(put("/api/v1/accounts/{id}", account.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .characterEncoding(StandardCharsets.UTF_8.name()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("_links.get-account-list.href").exists())
+                .andExpect(jsonPath("_links.create-account.href").exists())
+                .andExpect(jsonPath("_links.delete-account.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists());
+    }
+
+    @Test
+    @DisplayName("Delete other account with admin role")
+    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
+    void deleteOtherAccountWithAdminRole() throws Exception {
+        AccountDto account = accountService.createAccount(new SignupRequest(
+                "user@example.com",
+                "P@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name())
+        ));
+        mockMvc.perform(delete("/api/v1/accounts/{id}", account.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_links.create-account.href").exists())
+                .andExpect(jsonPath("_links.get-account-list.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists());
+    }
+
+    @Test
     @DisplayName("Try to get non-existent account")
+    @WithMockUser(username = "user@example.com", roles = {"USER"})
     void getNonExistentAccountDetail() throws Exception {
         mockMvc.perform(get("/api/v1/accounts/10"))
                 .andExpect(header().stringValues(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
@@ -231,6 +343,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Get account list successfully")
+    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
     void getAccountList() throws Exception {
         List<Account> accountList = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -295,10 +408,10 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Update an existing account successfully")
-    @Rollback(false)
+    @WithMockUser(username = "user@example.com", roles = {"USER"})
     void updateAccount() throws Exception {
         // given
-        String oldEmail = "admin@example.com";
+        String oldEmail = "user@example.com";
         String oldPassword = "P@ssw0rd1234";
         boolean oldActive = false;
         Set<AccountRole> oldRoles = Set.of(AccountRole.USER);
@@ -325,7 +438,7 @@ class AccountControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("createdAt").exists())
                 .andExpect(jsonPath("createdAt").exists())
                 .andExpect(jsonPath("_links.self.href").exists())
-                .andExpect(jsonPath("_links.get-account-list.href").exists())
+                .andExpect(jsonPath("_links.get-account-list.href").doesNotExist())
                 .andExpect(jsonPath("_links.create-account.href").exists())
                 .andExpect(jsonPath("_links.get-account-detail.href").exists())
                 .andExpect(jsonPath("_links.delete-account.href").exists())
@@ -345,7 +458,6 @@ class AccountControllerTest extends BaseControllerTest {
                                 fieldWithPath("createdAt").description("Created date and time of the account"),
                                 fieldWithPath("updatedAt").description("Last updated date and time of the account"),
                                 fieldWithPath("_links.self.href").description("Link to <<resources_account_retrieve, self>>"),
-                                fieldWithPath("_links.get-account-list.href").description("Link to <<resources_accounts_list, get account list>>"),
                                 fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
                                 fieldWithPath("_links.get-account-detail.href").description("Link to <<resources_account_retrieve, get account detail>>"),
                                 fieldWithPath("_links.delete-account.href").description("Link to <<resources_account_delete, delete an existing account>>"),
@@ -353,7 +465,6 @@ class AccountControllerTest extends BaseControllerTest {
                         ),
                         links(
                                 linkWithRel("self").description("Link to <<resources_account_retrieve, self>>"),
-                                linkWithRel("get-account-list").description("Link to <<resources_accounts_list, get account list>>"),
                                 linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
                                 linkWithRel("get-account-detail").description("Link to <<resources_account_retrieve, get account detail>>"),
                                 linkWithRel("delete-account").description("Link to <<resources_account_delete, delete an existing account>>"),
@@ -364,15 +475,12 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to update non-existent account")
+    @WithMockUser(username = "user@example.com", roles = {"USER"})
     void updateNonExistentAccount() throws Exception {
-        String newEmail = "newadmin@example.com";
-        String newPassword = "newP@ssw0rd1234";
-        boolean newActive = true;
-        Set<String> newRoles = Set.of(AccountRole.USER.name(), AccountRole.ADMIN.name());
-        SignupRequest request = new SignupRequest(newEmail, newPassword, newActive, newRoles);
+        AccountUpdateRequest request = new AccountUpdateRequest("newP@ssw0rd1234", true, Set.of(AccountRole.USER.name()));
 
         // when & then
-        mockMvc.perform(put("/api/v1/accounts/10")
+        mockMvc.perform(put("/api/v1/accounts/123123")
                         .accept(MediaTypes.HAL_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -381,9 +489,35 @@ class AccountControllerTest extends BaseControllerTest {
     }
 
     @Test
-    @DisplayName("Delete an existing account successfully")
+    @DisplayName("Delete an existing account successfully (by user)")
+    @WithMockUser(username = "user@example.com", roles = {"USER"})
     void deleteAccount() throws Exception {
-        Account account = new Account(null, "admin@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER));
+        Account account = new Account(null, "user@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER));
+        accountRepository.save(account);
+
+        mockMvc.perform(delete("/api/v1/accounts/{id}", account.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_links.profile.href").exists())
+                .andExpect(jsonPath("_links.create-account.href").exists())
+                .andExpect(jsonPath("_links.get-account-list.href").doesNotExist())
+
+                .andDo(documentHandler.document(
+                        responseFields(
+                                fieldWithPath("_links.create-account.href").description("Link to <<resources_accounts_create, create new account>>"),
+                                fieldWithPath("_links.profile.href").description("Link to document")
+                        ),
+                        links(
+                                linkWithRel("create-account").description("Link to <<resources_accounts_create, create new account>>"),
+                                linkWithRel("profile").description("Link to document")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("Delete an existing account successfully (by admin)")
+    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
+    void deleteAccountByAdmin() throws Exception {
+        Account account = new Account(null, "user@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER));
         accountRepository.save(account);
 
         mockMvc.perform(delete("/api/v1/accounts/{id}", account.getId()))
@@ -408,6 +542,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to delete non-existent account")
+    @WithMockUser(username = "user@example.com", roles = {"USER"})
     void deleteNonExistentAccount() throws Exception {
         mockMvc.perform(delete("/api/v1/accounts/10"))
                 .andExpect(status().isNotFound())
@@ -416,6 +551,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("_embedded.accounts array should not be disappeared when there are no saved accounts in database")
+    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
     void keepEmbeddedAccountsArrayWhenNoAccounts() throws Exception {
         mockMvc.perform(get("/api/v1/accounts"))
                 .andExpect(jsonPath("_embedded.accounts").exists())
@@ -424,9 +560,14 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Update an existing account to have only admin role")
+    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
     void updateAccountToHaveOnlyAdminRole() throws Exception {
-        Account account = new Account(null, "admin@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER, AccountRole.ADMIN));
-        accountRepository.save(account);
+        AccountDto account = accountService.createAccount(new SignupRequest(
+                "admin@example.com",
+                "P@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name(), AccountRole.ADMIN.name())
+        ));
 
         AccountUpdateRequest request = modelMapper.map(account, AccountUpdateRequest.class);
         request.setRoles(Set.of(AccountRole.ADMIN.name()));
@@ -442,9 +583,14 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Update an existing account to have only user role")
+    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
     void updateAccountToHaveOnlyUserRole() throws Exception {
-        Account account = new Account(null, "admin@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER, AccountRole.ADMIN));
-        accountRepository.save(account);
+        AccountDto account = accountService.createAccount(new SignupRequest(
+                "admin@example.com",
+                "P@ssw0rd1234",
+                true,
+                Set.of(AccountRole.USER.name(), AccountRole.ADMIN.name())
+        ));
 
         AccountUpdateRequest request = modelMapper.map(account, AccountUpdateRequest.class);
         request.setRoles(Set.of(AccountRole.USER.name()));
@@ -460,9 +606,10 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to update an existing account with invalid account role")
+    @WithMockUser(username = "user@example.com", roles = {"USER"})
     void updateAccountWithInvalidRoles() throws Exception {
         Set<AccountRole> accountRolesBeforeUpdate = Set.of(AccountRole.USER);
-        Account account = new Account(null, "admin@example.com", "P@ssw0rd1234", true, accountRolesBeforeUpdate);
+        Account account = new Account(null, "user@example.com", "P@ssw0rd1234", true, accountRolesBeforeUpdate);
         accountRepository.save(account);
 
         AccountUpdateRequest request = modelMapper.map(account, AccountUpdateRequest.class);

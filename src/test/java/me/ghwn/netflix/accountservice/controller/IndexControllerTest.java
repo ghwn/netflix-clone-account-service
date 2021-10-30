@@ -1,10 +1,10 @@
 package me.ghwn.netflix.accountservice.controller;
 
 import org.apache.http.HttpHeaders;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
@@ -17,6 +17,7 @@ class IndexControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Get links of all available resources")
+    @WithMockUser(username = "user@example.com", roles = {"USER"})
     void index() throws Exception {
         mockMvc.perform(get("/api"))
                 .andExpect(status().isOk())
@@ -32,26 +33,6 @@ class IndexControllerTest extends BaseControllerTest {
                         links(
                                 linkWithRel("profile").description("Link to document"),
                                 linkWithRel("accounts").description("Link to <<resources_accounts, accounts resource>>")
-                        )
-                ));
-    }
-
-    @Test
-    @DisplayName("Try to access invalid URI")
-    @Disabled
-    void accessInvalidUri() throws Exception {
-        mockMvc.perform(get("/api/v1/no-resources"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("errors[*].message").exists())
-                .andExpect(jsonPath("_links.index.href").exists())
-
-                .andDo(documentHandler.document(
-                        responseFields(
-                                fieldWithPath("errors[].message").description("Error message"),
-                                fieldWithPath("_links.index.href").description("Link to <<resources_index, index resource>>")
-                        ),
-                        links(
-                                linkWithRel("index").description("Link to <<resources_index, index resource>>")
                         )
                 ));
     }

@@ -5,6 +5,7 @@ import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -14,6 +15,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestControllerAdvice
 public class AccountControllerAdvice {
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e) {
+        return makeErrorResponse(e, HttpStatus.FORBIDDEN);
+    }
 
     @ExceptionHandler
     public ResponseEntity<?> handleException(Exception e) {
