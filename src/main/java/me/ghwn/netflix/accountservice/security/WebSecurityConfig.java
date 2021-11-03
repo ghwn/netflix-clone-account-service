@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.Filter;
 import java.util.Objects;
@@ -52,19 +53,32 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 .and()
-                .addFilter(buildAuthenticationFilter());
+                .addFilter(buildLoginFilter())
+                .addFilterBefore(buildJwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     /**
-     * Build a custom authentication filter.
+     * Builds a custom login filter.
+     * Login requires HTTP message body that contains 'email' and 'password' in JSON format.
+     * If login is succeeded, a new JWT token is added into the response header.
+     * For more details, see LoginFilter and LoginSuccessHandler.
      * @return filter
      * @throws Exception
      */
-    private Filter buildAuthenticationFilter() throws Exception {
+    private Filter buildLoginFilter() throws Exception {
         LoginFilter filter = new LoginFilter(authenticationManager());
         String secret = Objects.requireNonNull(env.getProperty("jwt.secret"));
         Long expiresInSeconds = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.expires-in-seconds", "3600")));
         filter.setAuthenticationSuccessHandler(new LoginSuccessHandler(secret, expiresInSeconds));
         return filter;
+    }
+
+    /**
+     * Builds a custom JWT authentication filter.
+     * JWT makes decentralized authentication possible, which means that all microservices should be able to parse JWT token.
+     * @return filter
+     */
+    private Filter buildJwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(env.getProperty("jwt.secret"), accountService);
     }
 }

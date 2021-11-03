@@ -56,6 +56,7 @@ public class AccountController {
         return ResponseEntity.created(selfLink.toUri()).body(content);
     }
 
+    // FIXME: Change User to AccountContext at @AuthenticationPrincipal
     @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> getAccountDetail(@PathVariable Long id, @AuthenticationPrincipal User user) {
         AccountDto accountDto = accountService.getAccount(id);

@@ -5,6 +5,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import javax.crypto.SecretKey;
@@ -28,7 +29,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     // FIXME: Add refresh token
     /**
-     * Issue new JWT token and add it into response header.
+     * Issue new JWT token and add it into the response header.
      * @param request
      * @param response
      * @param authentication
@@ -39,8 +40,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        AccountContext accountContext = (AccountContext) authentication.getPrincipal();
-        String subject = accountContext.getAccount().getEmail();
+        User user = (User) authentication.getPrincipal();
+        String subject = user.getUsername();  // email
+//        AccountContext accountContext = (AccountContext) authentication.getPrincipal();
+//        String subject = accountContext.getAccount().getEmail();
 
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
