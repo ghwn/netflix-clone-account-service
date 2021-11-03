@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import me.ghwn.netflix.accountservice.service.AccountService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,7 +18,7 @@ import javax.servlet.Filter;
 import java.util.Objects;
 
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
+@EnableGlobalMethodSecurity(jsr250Enabled = true)
 @RequiredArgsConstructor
 @Slf4j
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -35,7 +34,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+        web.ignoring()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .requestMatchers(PathRequest.toH2Console())
                 .antMatchers("/docs/index.html");
     }
 
@@ -45,9 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // FIXME: Not recommended to disable CSRF
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/api/v1/accounts", "/login").permitAll()
-                .antMatchers("/actuator/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
 
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
