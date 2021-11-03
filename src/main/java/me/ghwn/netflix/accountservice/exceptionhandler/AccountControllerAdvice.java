@@ -1,5 +1,6 @@
 package me.ghwn.netflix.accountservice.exceptionhandler;
 
+import io.jsonwebtoken.JwtException;
 import me.ghwn.netflix.accountservice.controller.IndexController;
 import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import org.springframework.hateoas.EntityModel;
@@ -15,6 +16,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestControllerAdvice
 public class AccountControllerAdvice {
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleJwtException(JwtException e) {
+        return makeErrorResponse(e, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e) {

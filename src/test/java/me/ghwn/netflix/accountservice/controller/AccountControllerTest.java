@@ -20,7 +20,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -345,12 +344,14 @@ class AccountControllerTest extends BaseControllerTest {
     @DisplayName("Get account list successfully")
     @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
     void getAccountList() throws Exception {
-        List<Account> accountList = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             String email = String.format("admin%d@example.com", (i + 1));
-            Account account = new Account(null, email, "P@ssw0rd1234", true, Set.of(AccountRole.USER));
-            accountRepository.save(account);
-            accountList.add(account);
+            accountService.createAccount(new SignupRequest(
+                    email,
+                    "P@ssw0rd1234",
+                    true,
+                    Set.of(AccountRole.USER.name())
+            ));
         }
 
         mockMvc.perform(get("/api/v1/accounts"))
