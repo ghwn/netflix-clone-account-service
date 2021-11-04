@@ -7,11 +7,11 @@ import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
+import me.ghwn.netflix.accountservice.security.AccountContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,8 +36,7 @@ public class AccountServiceImpl implements AccountService {
         Set<SimpleGrantedAuthority> authorities = account.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .collect(Collectors.toSet());
-//        return new AccountContext(account, authorities);
-        return new User(account.getEmail(), account.getPassword(), authorities);
+        return new AccountContext(account, authorities);
     }
 
     @Transactional

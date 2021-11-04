@@ -6,6 +6,7 @@ import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.entity.Account;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.repository.AccountRepository;
+import me.ghwn.netflix.accountservice.security.WithMockAccountContext;
 import me.ghwn.netflix.accountservice.service.AccountService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -166,7 +166,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Get an existing account successfully")
-    @WithMockUser(username = "user@example.com")
+    @WithMockAccountContext
     void getAccountDetail() throws Exception {
         AccountDto account = accountService.createAccount(new SignupRequest(
                 "user@example.com",
@@ -218,7 +218,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to get other account detail with user role")
-    @WithMockUser(username = "user1@example.com")
+    @WithMockAccountContext(email = "user1@example.com")
     void getOtherAccountDetailWithUserRole() throws Exception {
         AccountDto account = accountService.createAccount(new SignupRequest(
                 "user2@example.com",
@@ -232,7 +232,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to update other account with user role")
-    @WithMockUser(username = "user1@example.com")
+    @WithMockAccountContext(email = "user1@example.com")
     void updateOtherAccountWithUserRole() throws Exception {
         AccountDto account = accountService.createAccount(new SignupRequest(
                 "user2@example.com",
@@ -254,7 +254,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to delete other account with user role")
-    @WithMockUser(username = "user1@example.com")
+    @WithMockAccountContext(email = "user1@example.com")
     void deleteOtherAccountWithUserRole() throws Exception {
         AccountDto account = accountService.createAccount(new SignupRequest(
                 "user2@example.com",
@@ -268,7 +268,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Get other account detail with admin role")
-    @WithMockUser(username = "user1@example.com", roles = {"USER", "ADMIN"})
+    @WithMockAccountContext(email = "user1@example.com", roles = {"USER", "ADMIN"})
     void getOtherAccountDetailWithAdminRole() throws Exception {
         AccountDto account = accountService.createAccount(new SignupRequest(
                 "user2@example.com",
@@ -288,7 +288,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Update other account with admin role")
-    @WithMockUser(username = "user1@example.com", roles = {"USER", "ADMIN"})
+    @WithMockAccountContext(email = "user1@example.com", roles = {"USER", "ADMIN"})
     void updateOtherAccountWithAdminRole() throws Exception {
         AccountDto account = accountService.createAccount(new SignupRequest(
                 "user2@example.com",
@@ -315,7 +315,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Delete other account with admin role")
-    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
+    @WithMockAccountContext(email = "admin@example.com", roles = {"USER", "ADMIN"})
     void deleteOtherAccountWithAdminRole() throws Exception {
         AccountDto account = accountService.createAccount(new SignupRequest(
                 "user@example.com",
@@ -332,7 +332,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to get non-existent account")
-    @WithMockUser(username = "user@example.com", roles = {"USER"})
+    @WithMockAccountContext(email = "user@example.com", roles = {"USER"})
     void getNonExistentAccountDetail() throws Exception {
         mockMvc.perform(get("/api/v1/accounts/10"))
                 .andExpect(header().stringValues(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
@@ -342,7 +342,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Get account list successfully")
-    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
+    @WithMockAccountContext(email = "admin@example.com", roles = {"USER", "ADMIN"})
     void getAccountList() throws Exception {
         for (int i = 0; i < 100; i++) {
             String email = String.format("admin%d@example.com", (i + 1));
@@ -409,7 +409,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Update an existing account successfully")
-    @WithMockUser(username = "user@example.com", roles = {"USER"})
+    @WithMockAccountContext(email = "user@example.com", roles = {"USER"})
     void updateAccount() throws Exception {
         // given
         String oldEmail = "user@example.com";
@@ -476,7 +476,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to update non-existent account")
-    @WithMockUser(username = "user@example.com", roles = {"USER"})
+    @WithMockAccountContext(email = "user@example.com", roles = {"USER"})
     void updateNonExistentAccount() throws Exception {
         AccountUpdateRequest request = new AccountUpdateRequest("newP@ssw0rd1234", true, Set.of(AccountRole.USER.name()));
 
@@ -491,7 +491,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Delete an existing account successfully (by user)")
-    @WithMockUser(username = "user@example.com", roles = {"USER"})
+    @WithMockAccountContext(email = "user@example.com", roles = {"USER"})
     void deleteAccount() throws Exception {
         Account account = new Account(null, "user@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER));
         accountRepository.save(account);
@@ -516,7 +516,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Delete an existing account successfully (by admin)")
-    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
+    @WithMockAccountContext(email = "admin@example.com", roles = {"USER", "ADMIN"})
     void deleteAccountByAdmin() throws Exception {
         Account account = new Account(null, "user@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER));
         accountRepository.save(account);
@@ -543,7 +543,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to delete non-existent account")
-    @WithMockUser(username = "user@example.com", roles = {"USER"})
+    @WithMockAccountContext(email = "user@example.com", roles = {"USER"})
     void deleteNonExistentAccount() throws Exception {
         mockMvc.perform(delete("/api/v1/accounts/10"))
                 .andExpect(status().isNotFound())
@@ -552,7 +552,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("_embedded.accounts array should not be disappeared when there are no saved accounts in database")
-    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
+    @WithMockAccountContext(email = "admin@example.com", roles = {"USER", "ADMIN"})
     void keepEmbeddedAccountsArrayWhenNoAccounts() throws Exception {
         mockMvc.perform(get("/api/v1/accounts"))
                 .andExpect(jsonPath("_embedded.accounts").exists())
@@ -561,7 +561,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Update an existing account to have only admin role")
-    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
+    @WithMockAccountContext(email = "admin@example.com", roles = {"USER", "ADMIN"})
     void updateAccountToHaveOnlyAdminRole() throws Exception {
         AccountDto account = accountService.createAccount(new SignupRequest(
                 "admin@example.com",
@@ -584,7 +584,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Update an existing account to have only user role")
-    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
+    @WithMockAccountContext(email = "admin@example.com", roles = {"USER", "ADMIN"})
     void updateAccountToHaveOnlyUserRole() throws Exception {
         AccountDto account = accountService.createAccount(new SignupRequest(
                 "admin@example.com",
@@ -607,7 +607,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("Try to update an existing account with invalid account role")
-    @WithMockUser(username = "user@example.com", roles = {"USER"})
+    @WithMockAccountContext(email = "user@example.com", roles = {"USER"})
     void updateAccountWithInvalidRoles() throws Exception {
         Set<AccountRole> accountRolesBeforeUpdate = Set.of(AccountRole.USER);
         Account account = new Account(null, "user@example.com", "P@ssw0rd1234", true, accountRolesBeforeUpdate);

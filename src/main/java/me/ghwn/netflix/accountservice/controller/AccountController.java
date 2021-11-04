@@ -7,6 +7,7 @@ import me.ghwn.netflix.accountservice.dto.AccountDto;
 import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
+import me.ghwn.netflix.accountservice.security.AccountContext;
 import me.ghwn.netflix.accountservice.service.AccountService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -58,11 +58,12 @@ public class AccountController {
 
     // FIXME: Change User to AccountContext at @AuthenticationPrincipal
     @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
-    public ResponseEntity<?> getAccountDetail(@PathVariable Long id, @AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getAccountDetail(@PathVariable Long id, @AuthenticationPrincipal AccountContext accountContext) {
         AccountDto accountDto = accountService.getAccount(id);
 
         // Non-admin accounts cannot request other account's details.
-        if (!hasAuthority(user, AccountRole.ADMIN) && !accountDto.getEmail().equals(user.getUsername())) {
+        if (!hasAuthority(accountContext, AccountRole.ADMIN)
+                && !accountDto.getEmail().equals(accountContext.getAccount().getEmail())) {
             throw new AccessDeniedException("Access is denied");
         }
 
@@ -71,7 +72,7 @@ public class AccountController {
         Link selfLink = linkTo(getClass()).slash(id).withSelfRel();
         content.add(selfLink);
         content.add(Link.of("/docs/index.html#resources-account-detail").withRel("profile"));
-        if (hasAuthority(user, AccountRole.ADMIN)) {
+        if (hasAuthority(accountContext, AccountRole.ADMIN)) {
             content.add(linkTo(getClass()).withRel("get-account-list"));
         }
         content.add(linkTo(getClass()).withRel("create-account"));
@@ -83,11 +84,11 @@ public class AccountController {
     @GetMapping(produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> getAccountList(Pageable pageable,
                                             PagedResourcesAssembler<AccountDto> assembler,
-                                            @AuthenticationPrincipal User user) {
+                                            @AuthenticationPrincipal AccountContext accountContext) {
         Page<AccountDto> accountList = accountService.getAccountList(pageable);
 
         // Non-admin cannot list accounts.
-        if (!hasAuthority(user, AccountRole.ADMIN)) {
+        if (!hasAuthority(accountContext, AccountRole.ADMIN)) {
             throw new AccessDeniedException("Access is denied");
         }
 
@@ -112,11 +113,12 @@ public class AccountController {
     public ResponseEntity<?> updateAccount(@PathVariable Long id,
                                            @Valid @RequestBody AccountUpdateRequest request,
                                            BindingResult bindingResult,
-                                           @AuthenticationPrincipal User user) throws BindException {
+                                           @AuthenticationPrincipal AccountContext accountContext) throws BindException {
         AccountDto accountDto = accountService.getAccount(id);
 
         // Non-admin accounts cannot update other accounts.
-        if (!hasAuthority(user, AccountRole.ADMIN) && !user.getUsername().equals(accountDto.getEmail())) {
+        if (!hasAuthority(accountContext, AccountRole.ADMIN)
+                && !accountDto.getEmail().equals(accountContext.getAccount().getEmail())) {
             throw new AccessDeniedException("Access is denied");
         }
 
@@ -131,7 +133,7 @@ public class AccountController {
         Link selfLink = linkTo(getClass()).slash(updatedAccountDto.getId()).withSelfRel();
         content.add(selfLink);
         content.add(Link.of("/docs/index.html#resources-account-update").withRel("profile"));
-        if (hasAuthority(user, AccountRole.ADMIN)) {
+        if (hasAuthority(accountContext, AccountRole.ADMIN)) {
             content.add(linkTo(getClass()).withRel("get-account-list"));
         }
         content.add(linkTo(getClass()).withRel("create-account"));
@@ -142,11 +144,12 @@ public class AccountController {
 
     @DeleteMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> deleteAccount(@PathVariable Long id,
-                                           @AuthenticationPrincipal User user) {
+                                           @AuthenticationPrincipal AccountContext accountContext) {
         AccountDto accountDto = accountService.getAccount(id);
 
         // Non-admin accounts cannot delete other accounts.
-        if (!hasAuthority(user, AccountRole.ADMIN) && !user.getUsername().equals(accountDto.getEmail())) {
+        if (!hasAuthority(accountContext, AccountRole.ADMIN)
+                && !accountDto.getEmail().equals(accountContext.getAccount().getEmail())) {
             throw new AccessDeniedException("Access is denied");
         }
 
@@ -154,7 +157,7 @@ public class AccountController {
         RepresentationModel<?> content = RepresentationModel.of(null);
         content.add(Link.of("/docs/index.html#resources-account-delete").withRel("profile"));
         content.add(linkTo(getClass()).withRel("create-account"));
-        if (hasAuthority(user, AccountRole.ADMIN)) {
+        if (hasAuthority(accountContext, AccountRole.ADMIN)) {
             content.add(linkTo(getClass()).withRel("get-account-list"));
         }
         return ResponseEntity.ok().body(content);
@@ -172,13 +175,10 @@ public class AccountController {
         }
     }
 
-    private boolean hasAuthority(User user, AccountRole... requiredRoles) {
-        if (user != null) {
-            Set<AccountRole> accountRoleSet = user.getAuthorities().stream()
-                    .map(authority -> AccountRole.valueOf(authority.getAuthority().replace("ROLE_", "")))
-                    .collect(Collectors.toSet());
+    private boolean hasAuthority(AccountContext accountContext, AccountRole... requiredRoles) {
+        if (accountContext != null) {
             Set<AccountRole> requiredRoleSet = Arrays.stream(requiredRoles).collect(Collectors.toSet());
-            return accountRoleSet.stream().anyMatch(requiredRoleSet::contains);
+            return accountContext.getAccount().getRoles().stream().anyMatch(requiredRoleSet::contains);
         }
         return false;
     }
