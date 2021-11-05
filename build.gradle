@@ -3,6 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id 'jacoco'
 }
 
 group = 'me.ghwn.netflix'
@@ -60,8 +61,13 @@ asciidoctor {
     dependsOn test
 }
 
+jacocoTestReport {
+    dependsOn test
+}
+
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
 
 task copyDoc(type: Copy) {
