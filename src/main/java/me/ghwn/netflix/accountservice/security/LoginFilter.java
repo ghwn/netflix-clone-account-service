@@ -22,6 +22,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     /**
      * Attempt authentication by obtaining an email and a password from request.
      * The actual authentication process will be entrusted to authentication manager.
+     *
      * @param request
      * @param response
      * @return Authentication

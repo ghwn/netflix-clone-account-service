@@ -3,6 +3,7 @@ package me.ghwn.netflix.accountservice.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.ghwn.netflix.accountservice.service.AccountService;
+import me.ghwn.netflix.accountservice.service.JsonWebTokenService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -25,6 +26,7 @@ import java.util.Objects;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AccountService accountService;
+    private final JsonWebTokenService jsonWebTokenService;
     private final PasswordEncoder passwordEncoder;
     private final Environment env;
 
@@ -59,26 +61,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * Builds a custom login filter.
-     * Login requires HTTP message body that contains 'email' and 'password' in JSON format.
-     * If login is succeeded, a new JWT token is added into the response header.
-     * For more details, see LoginFilter and LoginSuccessHandler.
+     *
      * @return filter
      * @throws Exception
      */
     private Filter buildLoginFilter() throws Exception {
         LoginFilter filter = new LoginFilter(authenticationManager());
         String secret = Objects.requireNonNull(env.getProperty("jwt.secret"));
-        Long expiresInSeconds = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.expires-in-seconds", "3600")));
-        filter.setAuthenticationSuccessHandler(new LoginSuccessHandler(secret, expiresInSeconds));
+        Long accessExpirationTime = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.access-token.expiration-time", "3600")));
+        Long refreshExpirationTime = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.refresh-token.expiration-time", "1209600")));
+        LoginSuccessHandler loginSuccessHandler = new LoginSuccessHandler(jsonWebTokenService, secret, accessExpirationTime, refreshExpirationTime);
+        filter.setAuthenticationSuccessHandler(loginSuccessHandler);
         return filter;
     }
 
     /**
      * Builds a custom JWT authentication filter.
-     * JWT makes decentralized authentication possible, which means that all microservices should be able to parse JWT token.
+     *
      * @return filter
      */
     private Filter buildJwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(env.getProperty("jwt.secret"), accountService);
+        return new JwtAuthenticationFilter(env.getProperty("jwt.secret"), accountService, jsonWebTokenService);
     }
 }

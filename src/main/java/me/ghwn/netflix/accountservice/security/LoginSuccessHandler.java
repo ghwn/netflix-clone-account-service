@@ -1,35 +1,40 @@
 package me.ghwn.netflix.accountservice.security;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import me.ghwn.netflix.accountservice.service.JsonWebTokenService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-import javax.crypto.SecretKey;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String ISSUED_TOKEN_HEADER_NAME = "X-Auth-Token";
+    private static final String ACCESS_TOKEN_HEADER_NAME = "access-token";
+    private static final String REFRESH_TOKEN_HEADER_NAME = "refresh-token";
 
+    private final JsonWebTokenService jsonWebTokenService;
     private final String secret;
-    private final Long expiresInSeconds;
+    private final Long accessExpirationTime;
+    private final Long refreshExpirationTime;
 
-    public LoginSuccessHandler(String secret, Long expiresInSeconds) {
+    public LoginSuccessHandler(JsonWebTokenService jsonWebTokenService,
+                               String secret,
+                               Long accessExpirationTime,
+                               Long refreshExpirationTime) {
+        this.jsonWebTokenService = jsonWebTokenService;
         this.secret = secret;
-        this.expiresInSeconds = expiresInSeconds;
+        this.accessExpirationTime = accessExpirationTime;
+        this.refreshExpirationTime = refreshExpirationTime;
     }
 
-    // FIXME: Add refresh token
+
     /**
-     * Issue new JWT token and add it into the response header.
+     * Issues new JWT access token and add it into the response header.
+     * FIXME: Add refresh token
+     *
      * @param request
      * @param response
      * @param authentication
@@ -41,19 +46,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         User user = (User) authentication.getPrincipal();
-        String subject = user.getUsername();  // email
-//        AccountContext accountContext = (AccountContext) authentication.getPrincipal();
-//        String subject = accountContext.getAccount().getEmail();
-
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
-
-        String jwtToken = Jwts.builder()
-                .setSubject(subject)
-                .setExpiration(new Date(System.currentTimeMillis() + (expiresInSeconds * 1000)))
-                .signWith(secretKey, SignatureAlgorithm.HS512)
-                .compact();
-
-        response.addHeader(ISSUED_TOKEN_HEADER_NAME, jwtToken);
+        String email = user.getUsername();
+        String accessToken = jsonWebTokenService.createAccessToken(email, secret, accessExpirationTime);
+//        String refreshToken = jsonWebTokenService.createRefreshToken(secret, refreshExpirationTime);
+        response.addHeader(ACCESS_TOKEN_HEADER_NAME, accessToken);
+//        response.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken);
     }
 }
