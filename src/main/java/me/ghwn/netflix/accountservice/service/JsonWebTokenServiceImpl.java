@@ -1,6 +1,7 @@
 package me.ghwn.netflix.accountservice.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -19,6 +20,7 @@ public class JsonWebTokenServiceImpl implements JsonWebTokenService {
     public String createAccessToken(String email, String secret, Long expirationTime) {
         SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         return Jwts.builder()
+                .setHeaderParam(Header.TYPE, "JWT")
                 .claim("email", email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + (expirationTime * 1000)))
@@ -30,6 +32,7 @@ public class JsonWebTokenServiceImpl implements JsonWebTokenService {
     public String createRefreshToken(String secret, Long expirationTime) {
         SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         return Jwts.builder()
+                .setHeaderParam(Header.TYPE, "JWT")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + (expirationTime * 1000)))
                 .signWith(secretKey, SignatureAlgorithm.HS512)
