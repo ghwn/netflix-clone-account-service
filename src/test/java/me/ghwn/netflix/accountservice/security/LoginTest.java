@@ -44,7 +44,7 @@ public class LoginTest {
     }
 
     @Test
-    @DisplayName("Issue new JWT token")
+    @DisplayName("Issue new JWT access token")
     void issueJwtToken() throws Exception {
         // Sign up
         SignupRequest signupRequest = new SignupRequest(
@@ -58,6 +58,6 @@ public class LoginTest {
                         .content(objectMapper.writeValueAsString(loginRequest))
                         .characterEncoding(StandardCharsets.UTF_8.name()))
                 .andExpect(status().isOk())
-                .andExpect(header().exists("X-Auth-Token"));
+                .andExpect(header().exists("access-token"));
     }
 }
