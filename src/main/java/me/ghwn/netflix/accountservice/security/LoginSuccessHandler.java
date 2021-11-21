@@ -48,7 +48,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         User user = (User) authentication.getPrincipal();
         String email = user.getUsername();
         String accessToken = jsonWebTokenService.createAccessToken(email, secret, accessExpirationTime);
-        String refreshToken = jsonWebTokenService.createRefreshToken(secret, refreshExpirationTime);
+        String refreshToken = jsonWebTokenService.createRefreshToken(email, secret, refreshExpirationTime);
         response.addHeader(ACCESS_TOKEN_HEADER_NAME, accessToken);
         response.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken);
     }

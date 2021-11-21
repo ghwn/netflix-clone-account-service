@@ -81,6 +81,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * @return filter
      */
     private Filter buildJwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(env.getProperty("jwt.secret"), accountService, jsonWebTokenService);
+        String secret = Objects.requireNonNull(env.getProperty("jwt.secret"));
+        Long accessExpirationTime = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.access-token.expiration-time", "3600")));
+        return new JwtAuthenticationFilter(
+                secret,
+                accessExpirationTime,
+                accountService,
+                jsonWebTokenService
+        );
     }
 }
