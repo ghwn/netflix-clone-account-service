@@ -58,6 +58,7 @@ public class LoginTest {
                         .content(objectMapper.writeValueAsString(loginRequest))
                         .characterEncoding(StandardCharsets.UTF_8.name()))
                 .andExpect(status().isOk())
-                .andExpect(header().exists("access-token"));
+                .andExpect(header().exists("access-token"))
+                .andExpect(header().exists("refresh-token"));
     }
 }
