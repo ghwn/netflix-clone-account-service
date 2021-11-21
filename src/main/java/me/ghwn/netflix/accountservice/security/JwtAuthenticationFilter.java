@@ -94,8 +94,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             // Query refresh token by sending email.
             RefreshTokenDto refreshTokenDb = jsonWebTokenService.getRefreshToken(email_);
-            if (!refreshToken.equals(refreshTokenDb.getValue())) {
-                logger.error("Refresh token not matched");
+            if (refreshTokenDb == null || !refreshToken.equals(refreshTokenDb.getValue())) {
+                logger.error("Refresh token does not match");
                 sendError(response, HttpStatus.UNAUTHORIZED, "Invalid refresh token");
                 return;
             }
