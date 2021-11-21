@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ class AccountControllerTest extends BaseControllerTest {
 
     @Autowired AccountRepository accountRepository;
     @Autowired AccountService accountService;
+    @Autowired PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("Create new account successfully by passing required fields only")
@@ -344,7 +346,7 @@ class AccountControllerTest extends BaseControllerTest {
     @DisplayName("Get account list successfully")
     @WithMockAccountContext(email = "admin@example.com", roles = {"USER", "ADMIN"})
     void getAccountList() throws Exception {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 21; i++) {
             String email = String.format("admin%d@example.com", (i + 1));
             accountService.createAccount(new SignupRequest(
                     email,
