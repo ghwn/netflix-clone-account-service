@@ -44,7 +44,7 @@ public class LoginTest {
     }
 
     @Test
-    @DisplayName("Issue new JWT access token")
+    @DisplayName("Issue new JWT access token and refresh token")
     void issueJwtToken() throws Exception {
         // Sign up
         SignupRequest signupRequest = new SignupRequest(
