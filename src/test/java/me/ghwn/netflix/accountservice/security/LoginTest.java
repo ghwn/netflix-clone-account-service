@@ -1,6 +1,7 @@
 package me.ghwn.netflix.accountservice.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.ghwn.netflix.accountservice.dto.AccountDto;
 import me.ghwn.netflix.accountservice.dto.LoginRequest;
 import me.ghwn.netflix.accountservice.dto.SignupRequest;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
@@ -26,8 +27,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
 @SpringBootTest
@@ -243,5 +243,44 @@ public class LoginTest {
                         .header("refresh-token", refreshToken))
                 .andExpect(status().isUnauthorized())
                 .andExpect(header().doesNotExist("access-token"));
+    }
+
+    @DisplayName("Get refresh token by calling API")
+    @Test
+    void getRefreshToken() throws Exception {
+        // Sign up
+        SignupRequest signupRequest = new SignupRequest(
+                "user@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER.name()));
+        AccountDto account = accountService.createAccount(signupRequest);
+
+        // Login
+        LoginRequest loginRequest = modelMapper.map(signupRequest, LoginRequest.class);
+        MockHttpServletResponse response = mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest))
+                        .characterEncoding(StandardCharsets.UTF_8.name()))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("access-token"))
+                .andExpect(header().exists("refresh-token"))
+                .andReturn().getResponse();
+        String refreshToken = response.getHeader("refresh-token");
+
+        // Query refresh token
+        mockMvc.perform(get("/api/v1/accounts/{accountId}/refresh-token", account.getAccountId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("value").value(refreshToken));
+    }
+
+    @DisplayName("Try to get empty refresh token")
+    @Test
+    void getRefreshTokenEmpty() throws Exception {
+        // Sign up
+        SignupRequest signupRequest = new SignupRequest(
+                "user@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER.name()));
+        AccountDto account = accountService.createAccount(signupRequest);
+
+        // Query refresh token
+        mockMvc.perform(get("/api/v1/accounts/{accountId}/refresh-token", account.getAccountId()))
+                .andExpect(status().isNotFound());
     }
 }

@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import me.ghwn.netflix.accountservice.dto.RefreshTokenDto;
 import me.ghwn.netflix.accountservice.entity.RefreshToken;
+import me.ghwn.netflix.accountservice.exception.RefreshTokenNotFoundException;
 import me.ghwn.netflix.accountservice.repository.RefreshTokenRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,6 @@ public class JsonWebTokenServiceImpl implements JsonWebTokenService {
     public RefreshTokenDto getRefreshToken(String email) {
         return refreshTokenRepository.findByEmail(email)
                 .map(refreshToken -> modelMapper.map(refreshToken, RefreshTokenDto.class))
-                .orElse(null);
+                .orElseThrow(() -> new RefreshTokenNotFoundException());
     }
 }

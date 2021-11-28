@@ -152,6 +152,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String method = request.getMethod();
         String uri = request.getRequestURI();
-        return method.equalsIgnoreCase("POST") && (uri.equals("/api/v1/accounts") || uri.equals("/login"));
+        if (method.equalsIgnoreCase("GET")) {
+            if (uri.matches("^/api/v1/accounts/[a-z0-9-]+/refresh-token$")) {
+                return true;
+            }
+        }
+        if (method.equalsIgnoreCase("POST")) {
+            if (uri.equals("/api/v1/accounts")) {
+                return true;
+            }
+            if (uri.equals("/login")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

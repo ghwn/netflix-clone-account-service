@@ -2,13 +2,11 @@ package me.ghwn.netflix.accountservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.ghwn.netflix.accountservice.dto.AccountDetail;
-import me.ghwn.netflix.accountservice.dto.AccountDto;
-import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
-import me.ghwn.netflix.accountservice.dto.SignupRequest;
+import me.ghwn.netflix.accountservice.dto.*;
 import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.security.AccountContext;
 import me.ghwn.netflix.accountservice.service.AccountService;
+import me.ghwn.netflix.accountservice.service.JsonWebTokenService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +35,7 @@ public class AccountController {
 
     private final AccountService accountService;
     private final ModelMapper modelMapper;
+    private final JsonWebTokenService jsonWebTokenService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> createAccount(@Valid @RequestBody SignupRequest request,
@@ -56,7 +55,6 @@ public class AccountController {
         return ResponseEntity.created(selfLink.toUri()).body(content);
     }
 
-    // FIXME: Change User to AccountContext at @AuthenticationPrincipal
     @GetMapping(value = "/{accountId}", produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> getAccountDetail(@PathVariable String accountId, @AuthenticationPrincipal AccountContext accountContext) {
         AccountDto accountDto = accountService.getAccountByAccountId(accountId);
@@ -160,6 +158,19 @@ public class AccountController {
         if (hasAuthority(accountContext, AccountRole.ADMIN)) {
             content.add(linkTo(getClass()).withRel("get-account-list"));
         }
+        return ResponseEntity.ok().body(content);
+    }
+
+    @GetMapping(value = "/{accountId}/refresh-token", produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<?> getRefreshToken(@PathVariable String accountId) {
+        AccountDto account = accountService.getAccountByAccountId(accountId);
+        RefreshTokenDto refreshToken = jsonWebTokenService.getRefreshToken(account.getEmail());
+
+        EntityModel<RefreshTokenDto> content = EntityModel.of(refreshToken);
+        Link selfLink = linkTo(getClass()).slash(accountId).slash("refresh-token").withSelfRel();
+        Link loginLink = Link.of("/login").withRel("login");
+        content.add(selfLink);
+        content.add(loginLink);
         return ResponseEntity.ok().body(content);
     }
 
