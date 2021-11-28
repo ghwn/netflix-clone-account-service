@@ -16,9 +16,11 @@ public interface AccountService extends UserDetailsService {
 
     AccountDto createAccount(SignupRequest request);
 
-    AccountDto getAccount(Long id);
+    AccountDto getAccountById(Long id);
 
-    AccountDto getAccount(String email);
+    AccountDto getAccountByAccountId(String accountId);
+
+    AccountDto getAccountByEmail(String email);
 
     Page<AccountDto> getAccountList(Pageable pageable);
 

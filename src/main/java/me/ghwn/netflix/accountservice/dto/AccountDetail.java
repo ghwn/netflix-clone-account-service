@@ -9,12 +9,14 @@ import org.springframework.hateoas.server.core.Relation;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Getter @Setter @NoArgsConstructor
-@AllArgsConstructor
 @Relation(collectionRelation = "accounts")
+@AllArgsConstructor
+@Getter @Setter @NoArgsConstructor
 public class AccountDetail {
 
     private Long id;
+
+    private String accountId;
 
     private String email;
 

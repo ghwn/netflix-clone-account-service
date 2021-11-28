@@ -10,6 +10,7 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class WithMockAccountContextSecurityContextFactory implements WithSecurityContextFactory<WithMockAccountContext> {
@@ -22,6 +23,7 @@ public class WithMockAccountContextSecurityContextFactory implements WithSecurit
                 .collect(Collectors.toSet());
         Account account = new Account(
                 null,
+                UUID.randomUUID().toString(),
                 withMockAccountContext.email(),
                 withMockAccountContext.password(),
                 true,

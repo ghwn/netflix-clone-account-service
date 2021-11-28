@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
-@RestController
-@RequestMapping("/api/v1/accounts")
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/accounts")
+@RestController
 public class AccountController {
 
     private final AccountService accountService;
@@ -57,9 +57,9 @@ public class AccountController {
     }
 
     // FIXME: Change User to AccountContext at @AuthenticationPrincipal
-    @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
-    public ResponseEntity<?> getAccountDetail(@PathVariable Long id, @AuthenticationPrincipal AccountContext accountContext) {
-        AccountDto accountDto = accountService.getAccount(id);
+    @GetMapping(value = "/{accountId}", produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<?> getAccountDetail(@PathVariable String accountId, @AuthenticationPrincipal AccountContext accountContext) {
+        AccountDto accountDto = accountService.getAccountByAccountId(accountId);
 
         // Non-admin accounts cannot request other account's details.
         if (!hasAuthority(accountContext, AccountRole.ADMIN)
@@ -69,7 +69,7 @@ public class AccountController {
 
         AccountDetail accountDetail = modelMapper.map(accountDto, AccountDetail.class);
         EntityModel<AccountDetail> content = EntityModel.of(accountDetail);
-        Link selfLink = linkTo(getClass()).slash(id).withSelfRel();
+        Link selfLink = linkTo(getClass()).slash(accountId).withSelfRel();
         content.add(selfLink);
         content.add(Link.of("/docs/index.html#resources-account-detail").withRel("profile"));
         if (hasAuthority(accountContext, AccountRole.ADMIN)) {
@@ -109,12 +109,12 @@ public class AccountController {
         return ResponseEntity.ok(content);
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaTypes.HAL_JSON_VALUE)
-    public ResponseEntity<?> updateAccount(@PathVariable Long id,
+    @PutMapping(value = "/{accountId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<?> updateAccount(@PathVariable String accountId,
                                            @Valid @RequestBody AccountUpdateRequest request,
                                            BindingResult bindingResult,
                                            @AuthenticationPrincipal AccountContext accountContext) throws BindException {
-        AccountDto accountDto = accountService.getAccount(id);
+        AccountDto accountDto = accountService.getAccountByAccountId(accountId);
 
         // Non-admin accounts cannot update other accounts.
         if (!hasAuthority(accountContext, AccountRole.ADMIN)
@@ -127,7 +127,7 @@ public class AccountController {
         }
         validateAccountRoles(request.getRoles());
 
-        AccountDto updatedAccountDto = accountService.updateAccount(id, request);
+        AccountDto updatedAccountDto = accountService.updateAccount(accountDto.getId(), request);
 
         EntityModel<AccountDetail> content = EntityModel.of(modelMapper.map(updatedAccountDto, AccountDetail.class));
         Link selfLink = linkTo(getClass()).slash(updatedAccountDto.getId()).withSelfRel();
@@ -137,15 +137,15 @@ public class AccountController {
             content.add(linkTo(getClass()).withRel("get-account-list"));
         }
         content.add(linkTo(getClass()).withRel("create-account"));
-        content.add(linkTo(getClass()).slash(id).withRel("get-account-detail"));
-        content.add(linkTo(getClass()).slash(id).withRel("delete-account"));
+        content.add(linkTo(getClass()).slash(accountId).withRel("get-account-detail"));
+        content.add(linkTo(getClass()).slash(accountId).withRel("delete-account"));
         return ResponseEntity.ok().body(content);
     }
 
-    @DeleteMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
-    public ResponseEntity<?> deleteAccount(@PathVariable Long id,
+    @DeleteMapping(value = "/{accountId}", produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<?> deleteAccount(@PathVariable String accountId,
                                            @AuthenticationPrincipal AccountContext accountContext) {
-        AccountDto accountDto = accountService.getAccount(id);
+        AccountDto accountDto = accountService.getAccountByAccountId(accountId);
 
         // Non-admin accounts cannot delete other accounts.
         if (!hasAuthority(accountContext, AccountRole.ADMIN)
@@ -153,7 +153,7 @@ public class AccountController {
             throw new AccessDeniedException("Access is denied");
         }
 
-        accountService.deleteAccount(id);
+        accountService.deleteAccount(accountDto.getId());
         RepresentationModel<?> content = RepresentationModel.of(null);
         content.add(Link.of("/docs/index.html#resources-account-delete").withRel("profile"));
         content.add(linkTo(getClass()).withRel("create-account"));

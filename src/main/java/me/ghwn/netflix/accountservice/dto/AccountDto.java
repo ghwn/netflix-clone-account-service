@@ -8,11 +8,13 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Getter @Setter @NoArgsConstructor
 @AllArgsConstructor
+@Getter @Setter @NoArgsConstructor
 public class AccountDto {
 
     private Long id;
+
+    private String accountId;
 
     private String email;
 

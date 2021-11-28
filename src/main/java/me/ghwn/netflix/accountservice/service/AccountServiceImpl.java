@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,19 +45,27 @@ public class AccountServiceImpl implements AccountService {
     public AccountDto createAccount(SignupRequest request) {
         Account account = modelMapper.map(request, Account.class);
         account.setPassword(passwordEncoder.encode(request.getPassword()));
+        account.setAccountId(UUID.randomUUID().toString());
         accountRepository.save(account);
         return modelMapper.map(account, AccountDto.class);
     }
 
     @Override
-    public AccountDto getAccount(Long id) {
+    public AccountDto getAccountById(Long id) {
         return accountRepository.findById(id)
                 .map(account -> modelMapper.map(account, AccountDto.class))
                 .orElseThrow(() -> new AccountNotFoundException());
     }
 
     @Override
-    public AccountDto getAccount(String email) {
+    public AccountDto getAccountByAccountId(String accountId) {
+        return accountRepository.findByAccountId(accountId)
+                .map(account -> modelMapper.map(account, AccountDto.class))
+                .orElseThrow(() -> new AccountNotFoundException());
+    }
+
+    @Override
+    public AccountDto getAccountByEmail(String email) {
         return accountRepository.findByEmail(email)
                 .map(account -> modelMapper.map(account, AccountDto.class))
                 .orElseThrow(() -> new AccountNotFoundException());
