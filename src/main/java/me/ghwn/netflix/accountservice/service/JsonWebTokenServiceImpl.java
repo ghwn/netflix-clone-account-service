@@ -14,21 +14,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class JsonWebTokenServiceImpl implements JsonWebTokenService {
 
+    private static final String ACCOUNT_ID_PAYLOAD_KEY = "aid";
+
     private final RefreshTokenRepository refreshTokenRepository;
     private final ModelMapper modelMapper;
 
     @Override
-    public String createAccessToken(String email, String secret, Long expirationTime) {
+    public String createAccessToken(String claim, String secret, Long expirationTime) {
         SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, "JWT")
-                .claim("email", email)
+                .claim(ACCOUNT_ID_PAYLOAD_KEY, claim)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + (expirationTime * 1000)))
                 .signWith(secretKey, SignatureAlgorithm.HS512)
@@ -37,7 +40,7 @@ public class JsonWebTokenServiceImpl implements JsonWebTokenService {
 
     @Transactional
     @Override
-    public String createRefreshToken(String email, String secret, Long expirationTime) {
+    public String createRefreshToken(String accountId, String secret, Long expirationTime) {
         SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         String refreshToken = Jwts.builder()
                 .setHeaderParam(Header.TYPE, "JWT")
@@ -45,9 +48,17 @@ public class JsonWebTokenServiceImpl implements JsonWebTokenService {
                 .setExpiration(new Date(System.currentTimeMillis() + (expirationTime * 1000)))
                 .signWith(secretKey, SignatureAlgorithm.HS512)
                 .compact();
-        RefreshToken refreshTokenEntity = new RefreshToken(null, email, refreshToken);
-        refreshTokenRepository.save(refreshTokenEntity);
-        return refreshToken;
+
+        Optional<RefreshToken> refreshTokenQueried = refreshTokenRepository.findByAccountId(accountId);
+        RefreshToken refreshTokenEntity = null;
+        if (refreshTokenQueried.isPresent()) {
+            refreshTokenEntity = refreshTokenQueried.get();
+            refreshTokenEntity.setValue(refreshToken);
+        } else {
+            refreshTokenEntity = new RefreshToken(null, accountId, refreshToken);
+        }
+        RefreshToken savedRefreshToken = refreshTokenRepository.save(refreshTokenEntity);
+        return savedRefreshToken.getValue();
     }
 
     @Override
@@ -69,9 +80,9 @@ public class JsonWebTokenServiceImpl implements JsonWebTokenService {
     }
 
     @Override
-    public RefreshTokenDto getRefreshToken(String email) {
-        return refreshTokenRepository.findByEmail(email)
+    public RefreshTokenDto getRefreshToken(String accountId) {
+        return refreshTokenRepository.findByAccountId(accountId)
                 .map(refreshToken -> modelMapper.map(refreshToken, RefreshTokenDto.class))
-                .orElseThrow(() -> new RefreshTokenNotFoundException());
+                .orElseThrow(RefreshTokenNotFoundException::new);
     }
 }

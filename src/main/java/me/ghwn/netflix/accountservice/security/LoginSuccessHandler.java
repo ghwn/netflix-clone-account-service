@@ -2,7 +2,6 @@ package me.ghwn.netflix.accountservice.security;
 
 import me.ghwn.netflix.accountservice.service.JsonWebTokenService;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import javax.servlet.ServletException;
@@ -32,8 +31,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
 
     /**
-     * Issues new JWT access token and add it into the response header.
-     * FIXME: Add refresh token
+     * Issues new JWT access and refresh token and add them into the response header.
      *
      * @param request
      * @param response
@@ -45,10 +43,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        User user = (User) authentication.getPrincipal();
-        String email = user.getUsername();
-        String accessToken = jsonWebTokenService.createAccessToken(email, secret, accessExpirationTime);
-        String refreshToken = jsonWebTokenService.createRefreshToken(email, secret, refreshExpirationTime);
+        AccountContext accountContext = (AccountContext) authentication.getPrincipal();
+        String accountId = accountContext.getAccount().getAccountId();
+        String accessToken = jsonWebTokenService.createAccessToken(accountId, secret, accessExpirationTime);
+        String refreshToken = jsonWebTokenService.createRefreshToken(accountId, secret, refreshExpirationTime);
         response.addHeader(ACCESS_TOKEN_HEADER_NAME, accessToken);
         response.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken);
     }

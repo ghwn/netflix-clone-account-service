@@ -14,7 +14,7 @@ public class RefreshToken extends TimestampedEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String accountId;
 
     @Column(nullable = false)
     private String value;

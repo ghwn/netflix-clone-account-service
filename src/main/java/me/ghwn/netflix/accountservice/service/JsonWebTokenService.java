@@ -6,9 +6,9 @@ import me.ghwn.netflix.accountservice.dto.RefreshTokenDto;
 
 public interface JsonWebTokenService {
 
-    String createAccessToken(String email, String secret, Long expirationTime);
+    String createAccessToken(String claim, String secret, Long expirationTime);
 
-    String createRefreshToken(String email, String secret, Long expirationTime);
+    String createRefreshToken(String claim, String secret, Long expirationTime);
 
     Jws<Claims> parseAccessToken(String accessToken, String secret);
 

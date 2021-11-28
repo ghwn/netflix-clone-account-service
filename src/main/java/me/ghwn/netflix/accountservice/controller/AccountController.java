@@ -48,9 +48,9 @@ public class AccountController {
         AccountDto createdAccountDto = accountService.createAccount(request);
 
         EntityModel<AccountDetail> content = EntityModel.of(modelMapper.map(createdAccountDto, AccountDetail.class));
-        Link selfLink = linkTo(getClass()).slash(createdAccountDto.getId()).withSelfRel();
+        Link selfLink = linkTo(getClass()).slash(createdAccountDto.getAccountId()).withSelfRel();
         content.add(selfLink);
-        content.add(selfLink.withRel("create-account"));
+        content.add(linkTo(getClass()).withRel("create-account"));
         content.add(Link.of("/docs/index.html#resources-accounts-create").withRel("profile"));
         return ResponseEntity.created(selfLink.toUri()).body(content);
     }
@@ -164,7 +164,7 @@ public class AccountController {
     @GetMapping(value = "/{accountId}/refresh-token", produces = MediaTypes.HAL_JSON_VALUE)
     public ResponseEntity<?> getRefreshToken(@PathVariable String accountId) {
         AccountDto account = accountService.getAccountByAccountId(accountId);
-        RefreshTokenDto refreshToken = jsonWebTokenService.getRefreshToken(account.getEmail());
+        RefreshTokenDto refreshToken = jsonWebTokenService.getRefreshToken(account.getAccountId());
 
         EntityModel<RefreshTokenDto> content = EntityModel.of(refreshToken);
         Link selfLink = linkTo(getClass()).slash(accountId).slash("refresh-token").withSelfRel();

@@ -46,7 +46,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                // FIXME: Not recommended to disable CSRF
                 .csrf().disable()
                 .authorizeRequests()
                 .anyRequest().permitAll()
@@ -56,13 +55,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .addFilter(buildLoginFilter())
-                .addFilterBefore(buildJwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(buildAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     /**
      * Builds a custom login filter.
      *
-     * @return filter
+     * @return LoginFilter
      * @throws Exception
      */
     private Filter buildLoginFilter() throws Exception {
@@ -76,18 +75,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * Builds a custom JWT authentication filter.
+     * Builds authentication filter.
      *
-     * @return filter
+     * @return AuthenticationFilter
+     * @throws Exception
      */
-    private Filter buildJwtAuthenticationFilter() {
-        String secret = Objects.requireNonNull(env.getProperty("jwt.secret"));
-        Long accessExpirationTime = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.access-token.expiration-time", "3600")));
-        return new JwtAuthenticationFilter(
-                secret,
-                accessExpirationTime,
-                accountService,
-                jsonWebTokenService
-        );
+    private Filter buildAuthenticationFilter() throws Exception {
+        return new AuthenticationFilter(accountService);
     }
+
 }
