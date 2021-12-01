@@ -3,7 +3,6 @@ package me.ghwn.netflix.accountservice.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.ghwn.netflix.accountservice.service.AccountService;
-import me.ghwn.netflix.accountservice.service.JsonWebTokenService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -14,7 +13,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.Filter;
 import java.util.Objects;
@@ -26,7 +24,6 @@ import java.util.Objects;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AccountService accountService;
-    private final JsonWebTokenService jsonWebTokenService;
     private final PasswordEncoder passwordEncoder;
     private final Environment env;
 
@@ -54,8 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 .and()
-                .addFilter(buildLoginFilter())
-                .addFilterBefore(buildAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilter(buildLoginFilter());
     }
 
     /**
@@ -67,21 +63,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private Filter buildLoginFilter() throws Exception {
         LoginFilter filter = new LoginFilter(authenticationManager());
         String secret = Objects.requireNonNull(env.getProperty("jwt.secret"));
-        Long accessExpirationTime = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.access-token.expiration-time", "3600")));
-        Long refreshExpirationTime = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.refresh-token.expiration-time", "1209600")));
-        LoginSuccessHandler loginSuccessHandler = new LoginSuccessHandler(jsonWebTokenService, secret, accessExpirationTime, refreshExpirationTime);
+        Long accessExpirationTime = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.access-token.expiration-time")));
+        LoginSuccessHandler loginSuccessHandler = new LoginSuccessHandler(secret, accessExpirationTime);
         filter.setAuthenticationSuccessHandler(loginSuccessHandler);
         return filter;
-    }
-
-    /**
-     * Builds authentication filter.
-     *
-     * @return AuthenticationFilter
-     * @throws Exception
-     */
-    private Filter buildAuthenticationFilter() throws Exception {
-        return new AuthenticationFilter(accountService);
     }
 
 }

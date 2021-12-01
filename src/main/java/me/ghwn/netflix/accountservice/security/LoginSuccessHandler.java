@@ -1,53 +1,55 @@
 package me.ghwn.netflix.accountservice.security;
 
-import me.ghwn.netflix.accountservice.service.JsonWebTokenService;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
+import javax.crypto.SecretKey;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
 
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String ACCESS_TOKEN_HEADER_NAME = "access-token";
-    private static final String REFRESH_TOKEN_HEADER_NAME = "refresh-token";
+    private static String ACCOUNT_ID_PAYLOAD_KEY = "aid";
+    private static String ACCESS_TOKEN_HEADER_NAME = "access-token";
+    private static String ACCOUNT_ID_HEADER_NAME = "account-id";
 
-    private final JsonWebTokenService jsonWebTokenService;
     private final String secret;
     private final Long accessExpirationTime;
-    private final Long refreshExpirationTime;
 
-    public LoginSuccessHandler(JsonWebTokenService jsonWebTokenService,
-                               String secret,
-                               Long accessExpirationTime,
-                               Long refreshExpirationTime) {
-        this.jsonWebTokenService = jsonWebTokenService;
+    public LoginSuccessHandler(String secret, Long accessExpirationTime) {
         this.secret = secret;
         this.accessExpirationTime = accessExpirationTime;
-        this.refreshExpirationTime = refreshExpirationTime;
     }
 
-
-    /**
-     * Issues new JWT access and refresh token and add them into the response header.
-     *
-     * @param request
-     * @param response
-     * @param authentication
-     * @throws IOException
-     * @throws ServletException
-     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         AccountContext accountContext = (AccountContext) authentication.getPrincipal();
         String accountId = accountContext.getAccount().getAccountId();
-        String accessToken = jsonWebTokenService.createAccessToken(accountId, secret, accessExpirationTime);
-        String refreshToken = jsonWebTokenService.createRefreshToken(accountId, secret, refreshExpirationTime);
+        String accessToken = createAccessToken(accountId, secret, accessExpirationTime);
+
         response.addHeader(ACCESS_TOKEN_HEADER_NAME, accessToken);
-        response.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken);
+        response.addHeader(ACCOUNT_ID_HEADER_NAME, accountId);
     }
+
+    private String createAccessToken(String accountId, String secret, Long accessExpirationTime) {
+        SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+        return Jwts.builder()
+                .setHeaderParam(Header.TYPE, "JWT")
+                .claim(ACCOUNT_ID_PAYLOAD_KEY, accountId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + (accessExpirationTime * 1000)))
+                .signWith(secretKey, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
 }
