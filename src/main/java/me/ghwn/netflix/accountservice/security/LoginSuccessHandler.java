@@ -17,9 +17,9 @@ import java.util.Date;
 
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static String ACCOUNT_ID_PAYLOAD_KEY = "aid";
-    private static String ACCESS_TOKEN_HEADER_NAME = "access-token";
-    private static String ACCOUNT_ID_HEADER_NAME = "account-id";
+    private static final String ACCOUNT_ID_PAYLOAD_KEY = "aid";
+    private static final String ACCESS_TOKEN_HEADER_NAME = "access-token";
+    private static final String ACCOUNT_ID_HEADER_NAME = "account-id";
 
     private final String secret;
     private final Long accessExpirationTime;
