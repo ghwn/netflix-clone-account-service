@@ -41,13 +41,13 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.addHeader(ACCOUNT_ID_HEADER_NAME, accountId);
     }
 
-    private String createAccessToken(String accountId, String secret, Long accessExpirationTime) {
+    private String createAccessToken(String accountId, String secret, Long expirationTime) {
         SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, "JWT")
                 .claim(ACCOUNT_ID_PAYLOAD_KEY, accountId)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + (accessExpirationTime * 1000)))
+                .setExpiration(new Date(System.currentTimeMillis() + (expirationTime * 1000)))
                 .signWith(secretKey, SignatureAlgorithm.HS512)
                 .compact();
     }
