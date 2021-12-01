@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+      discovery:
+        enabled: false
+    bus:
+      enabled: false
+    discovery:
+      enabled: false
+    loadbalancer:
+      enabled: false
+      cache:
+        enabled: false
