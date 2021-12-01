@@ -27,4 +27,5 @@ public interface AccountService extends UserDetailsService {
     AccountDto updateAccount(Long id, AccountUpdateRequest request);
 
     void deleteAccount(Long id);
+
 }

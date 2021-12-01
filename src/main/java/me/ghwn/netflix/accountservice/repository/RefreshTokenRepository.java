@@ -10,4 +10,5 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     Optional<RefreshToken> findByAccountId(String accountId);
 
     boolean existsByAccountId(String accountId);
+
 }

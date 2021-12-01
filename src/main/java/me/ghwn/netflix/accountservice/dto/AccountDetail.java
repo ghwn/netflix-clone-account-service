@@ -27,4 +27,5 @@ public class AccountDetail {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
 }

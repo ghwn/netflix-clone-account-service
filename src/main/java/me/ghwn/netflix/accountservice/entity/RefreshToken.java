@@ -18,4 +18,5 @@ public class RefreshToken extends TimestampedEntity {
 
     @Column(nullable = false)
     private String value;
+
 }

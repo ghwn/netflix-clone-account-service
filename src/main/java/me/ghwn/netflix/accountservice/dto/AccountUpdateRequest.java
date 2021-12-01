@@ -9,8 +9,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.Set;
 
-@Getter @Setter @NoArgsConstructor
 @AllArgsConstructor
+@Getter @Setter @NoArgsConstructor
 public class AccountUpdateRequest {
 
     @NotEmpty(message = "Password is required")
@@ -20,4 +20,5 @@ public class AccountUpdateRequest {
     private Boolean active;
 
     private Set<String> roles;
+
 }

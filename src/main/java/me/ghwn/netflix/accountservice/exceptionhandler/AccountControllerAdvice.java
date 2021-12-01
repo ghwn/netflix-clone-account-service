@@ -58,4 +58,5 @@ public class AccountControllerAdvice {
         content.add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
         return ResponseEntity.status(httpStatus).body(content);
     }
+
 }

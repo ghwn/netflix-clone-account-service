@@ -19,8 +19,8 @@ public class AccountMappingTest {
 
     @Autowired ModelMapper modelMapper;
 
-    @Test
     @DisplayName("Convert AccountCreationRequest to Entity")
+    @Test
     void accountCreationRequestToEntity() {
         String email = "admin@example.com";
         String password = "P@ssw0rd1234";
@@ -36,8 +36,8 @@ public class AccountMappingTest {
         assertThat(account.getRoles()).containsExactly(AccountRole.USER);
     }
 
-    @Test
     @DisplayName("Convert HashMap that contains only required fields to Entity")
+    @Test
     void minimumFieldsToEntity() {
         String email = "admin@example.com";
         String password = "P@ssw0rd1234";
@@ -52,4 +52,5 @@ public class AccountMappingTest {
         assertThat(account.isActive()).isTrue();
         assertThat(account.getRoles()).containsExactly(AccountRole.USER);
     }
+
 }

@@ -41,4 +41,5 @@ public class WithMockAccountContextSecurityContextFactory implements WithSecurit
         securityContext.setAuthentication(authenticationToken);
         return securityContext;
     }
+
 }

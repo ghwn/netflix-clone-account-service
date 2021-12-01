@@ -7,8 +7,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AccountTest {
 
-    @Test
     @DisplayName("Two account instances with the same ID should be equal to each other")
+    @Test
     void equals() {
         Account account1 = new Account();
         account1.setId(1L);
@@ -18,4 +18,5 @@ class AccountTest {
 
         assertThat(account1).isEqualTo(account2);
     }
+
 }

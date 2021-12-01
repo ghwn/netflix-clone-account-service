@@ -18,4 +18,5 @@ public class AccountContext extends User {
     public Account getAccount() {
         return account;
     }
+
 }

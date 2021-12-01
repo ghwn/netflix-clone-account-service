@@ -23,4 +23,5 @@ public class BindExceptionJsonSerializer extends JsonSerializer<BindException> {
         }
         gen.writeEndArray();
     }
+
 }

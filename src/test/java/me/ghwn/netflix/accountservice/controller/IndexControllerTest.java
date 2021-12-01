@@ -15,9 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class IndexControllerTest extends BaseControllerTest {
 
-    @Test
     @DisplayName("Get links of all available resources")
     @WithMockUser(username = "user@example.com", roles = {"USER"})
+    @Test
     void index() throws Exception {
         mockMvc.perform(get("/api"))
                 .andExpect(status().isOk())
@@ -36,4 +36,5 @@ class IndexControllerTest extends BaseControllerTest {
                         )
                 ));
     }
+
 }

@@ -6,7 +6,6 @@ import me.ghwn.netflix.accountservice.service.AccountService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,10 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.servlet.Filter;
 import java.util.Objects;
 
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(jsr250Enabled = true)
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
+@EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AccountService accountService;

@@ -22,9 +22,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Service
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
@@ -91,4 +91,5 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException());
         accountRepository.delete(account);
     }
+
 }

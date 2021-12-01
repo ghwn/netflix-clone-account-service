@@ -19,4 +19,5 @@ public abstract class TimestampedEntity {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
 }

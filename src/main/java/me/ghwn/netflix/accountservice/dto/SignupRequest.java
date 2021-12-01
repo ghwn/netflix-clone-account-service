@@ -10,8 +10,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.Set;
 
-@Getter @Setter @NoArgsConstructor
 @AllArgsConstructor
+@Getter @Setter @NoArgsConstructor
 public class SignupRequest {
 
     @Email(message = "Invalid email format")
@@ -25,4 +25,5 @@ public class SignupRequest {
     private Boolean active;
 
     private Set<String> roles;
+
 }

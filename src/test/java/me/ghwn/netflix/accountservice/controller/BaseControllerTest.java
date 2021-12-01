@@ -20,8 +20,8 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @ExtendWith({RestDocumentationExtension.class})
-@SpringBootTest
 @Transactional
+@SpringBootTest
 public abstract class BaseControllerTest {
 
     @Autowired WebApplicationContext webApplicationContext;
@@ -45,4 +45,5 @@ public abstract class BaseControllerTest {
                 .alwaysDo(documentHandler)
                 .build();
     }
+
 }

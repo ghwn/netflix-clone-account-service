@@ -20,4 +20,5 @@ public class RefreshTokenDto {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
 }

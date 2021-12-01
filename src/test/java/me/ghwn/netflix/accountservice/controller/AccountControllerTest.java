@@ -673,4 +673,5 @@ class AccountControllerTest extends BaseControllerTest {
                 .extracting(Enum::name)
                 .hasSameElementsAs(accountRolesBeforeUpdate);
     }
+
 }

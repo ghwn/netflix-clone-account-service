@@ -19,4 +19,5 @@ public class ExceptionJsonSerializer extends JsonSerializer<Exception> {
         gen.writeEndObject();
         gen.writeEndArray();
     }
+
 }

@@ -10,9 +10,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@SpringBootApplication
-@EnableEurekaClient
 @EnableJpaAuditing
+@EnableEurekaClient
+@SpringBootApplication
 public class AccountServiceApplication {
 
     public static void main(String[] args) {
@@ -35,4 +35,5 @@ public class AccountServiceApplication {
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
+
 }

@@ -19,4 +19,5 @@ public class IndexController {
         content.add(linkTo(AccountController.class).withRel("accounts"));
         return ResponseEntity.ok(content);
     }
+
 }
