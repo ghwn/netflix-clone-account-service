@@ -7,6 +7,7 @@ import me.ghwn.netflix.accountservice.exception.RefreshTokenNotFoundException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,6 +18,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestControllerAdvice
 public class AccountControllerAdvice {
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return makeErrorResponse(e, HttpStatus.BAD_REQUEST);    // or consider 422 Error UNPROCESSABLE_ENTITY
+    }
 
     @ExceptionHandler
     public ResponseEntity<?> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException e) {

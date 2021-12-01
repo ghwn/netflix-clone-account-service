@@ -6,7 +6,6 @@ import me.ghwn.netflix.accountservice.dto.AccountDetail;
 import me.ghwn.netflix.accountservice.dto.AccountDto;
 import me.ghwn.netflix.accountservice.dto.AccountUpdateRequest;
 import me.ghwn.netflix.accountservice.dto.SignupRequest;
-import me.ghwn.netflix.accountservice.entity.AccountRole;
 import me.ghwn.netflix.accountservice.service.AccountService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -20,7 +19,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -39,8 +37,6 @@ public class AccountController {
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
         }
-        validateAccountRoles(request.getRoles());
-
         AccountDto createdAccountDto = accountService.createAccount(request);
 
         EntityModel<AccountDetail> content = EntityModel.of(modelMapper.map(createdAccountDto, AccountDetail.class));
@@ -96,8 +92,6 @@ public class AccountController {
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
         }
-        validateAccountRoles(request.getRoles());
-
         AccountDto accountDto = accountService.getAccountByAccountId(accountId);
         AccountDto updatedAccountDto = accountService.updateAccount(accountDto.getId(), request);
 
@@ -122,18 +116,6 @@ public class AccountController {
         content.add(linkTo(getClass()).withRel("create-account"));
         content.add(linkTo(getClass()).withRel("get-account-list"));
         return ResponseEntity.ok().body(content);
-    }
-
-    private void validateAccountRoles(Set<String> accountRoles) {
-        if (accountRoles != null) {
-            try {
-                for (String accountRole : accountRoles) {
-                    AccountRole.valueOf(accountRole.toUpperCase());
-                }
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid account role contained");
-            }
-        }
     }
 
 }

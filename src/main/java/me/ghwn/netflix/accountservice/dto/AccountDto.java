@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import me.ghwn.netflix.accountservice.entity.AccountRole;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -22,7 +23,7 @@ public class AccountDto {
 
     private boolean active;
 
-    private Set<String> roles;
+    private Set<AccountRole> roles;
 
     private LocalDateTime createdAt;
 

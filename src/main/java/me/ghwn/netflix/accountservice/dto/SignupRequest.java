@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import me.ghwn.netflix.accountservice.entity.AccountRole;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
@@ -24,6 +25,6 @@ public class SignupRequest {
 
     private Boolean active;
 
-    private Set<String> roles;
+    private Set<AccountRole> roles;
 
 }
