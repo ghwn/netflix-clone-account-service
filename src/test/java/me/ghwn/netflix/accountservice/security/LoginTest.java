@@ -53,7 +53,7 @@ public class LoginTest {
     void issueJwtToken() throws Exception {
         // Sign up
         SignupRequest signupRequest = new SignupRequest(
-                "user@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER.name()));
+                "user@example.com", "P@ssw0rd1234", true, Set.of(AccountRole.USER));
         accountService.createAccount(signupRequest);
 
         // Login
