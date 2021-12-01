@@ -48,7 +48,7 @@ public class LoginTest {
                 .build();
     }
 
-    @DisplayName("Issue new JWT access token and refresh token")
+    @DisplayName("Issue new JWT token")
     @Test
     void issueJwtToken() throws Exception {
         // Sign up
@@ -64,7 +64,7 @@ public class LoginTest {
                         .characterEncoding(StandardCharsets.UTF_8.name()))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("access-token"))
-                .andExpect(header().exists("refresh-token"));
+                .andExpect(header().exists("account-id"));
     }
 
 }
