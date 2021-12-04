@@ -3,7 +3,6 @@ package me.ghwn.netflix.accountservice.exceptionhandler;
 import io.jsonwebtoken.JwtException;
 import me.ghwn.netflix.accountservice.controller.IndexController;
 import me.ghwn.netflix.accountservice.exception.AccountNotFoundException;
-import me.ghwn.netflix.accountservice.exception.RefreshTokenNotFoundException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +21,6 @@ public class AccountControllerAdvice {
     @ExceptionHandler
     public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         return makeErrorResponse(e, HttpStatus.BAD_REQUEST);    // or consider 422 Error UNPROCESSABLE_ENTITY
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<?> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException e) {
-        return makeErrorResponse(e, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
